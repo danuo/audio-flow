@@ -6,56 +6,76 @@ import android.widget.TextView
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
+import android.media.AudioFormat
+import android.media.AudioRecord
+import android.media.MediaRecorder
 
 class MainActivity : ComponentActivity() {
-    private lateinit var webView: WebView
-    private lateinit var textView: TextView
-    private var counter = 0
+
+    private lateinit var audioRecord: AudioRecord
+    private var isRecording = false
     private val handler = Handler()
-    private val updateRunnable = object : Runnable {
-        override fun run() {
-            textView.text = counter.toString()
-            counter++
-            handler.postDelayed(this, 1000) // Run again after 1 second
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)  // Set the layout XML
+        setContentView(R.layout.activity_main)
 
-        webView = findViewById(R.id.webView)
-        webView!!.settings.javaScriptEnabled = true
-        webView!!.loadUrl("https://www.example.com")
+        // Initialize audioRecord with appropriate settings
+        val minBufferSize = AudioRecord.getMinBufferSize(
+            SAMPLE_RATE,
+            AudioFormat.CHANNEL_IN_MONO,
+            AudioFormat.ENCODING_PCM_16BIT
+        )
+        audioRecord = AudioRecord(
+            MediaRecorder.AudioSource.MIC,
+            SAMPLE_RATE,
+            AudioFormat.CHANNEL_IN_MONO,
+            AudioFormat.ENCODING_PCM_16BIT,
+            minBufferSize
+        )
 
-        textView = findViewById(R.id.textView)
-
-
-        // Set up WebViewClient to handle page navigation within the WebView
-        webView!!.webViewClient = object : WebViewClient() {
-            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-                view.loadUrl(url)
-                return true
-            }
+        startButton.setOnClickListener {
+            isRecording = true
+            audioRecord.startRecording()
+            updateVoiceLevel()
         }
 
-        // Start updating the text every second
-        handler.post(updateRunnable)
+        stopButton.setOnClickListener {
+            isRecording = false
+            audioRecord.stop()
+        }
     }
 
-    override fun onPause() {
-        super.onPause()
-        webView!!.onPause()
+    private fun updateVoiceLevel() {
+        Thread {
+            val audioBuffer = ShortArray(BUFFER_SIZE)
+            while (isRecording) {
+                audioRecord.read(audioBuffer, 0, BUFFER_SIZE)
+                val maxAmplitude = calculateMaxAmplitude(audioBuffer)
+                updateUI(maxAmplitude)
+            }
+        }.start()
     }
 
-    override fun onResume() {
-        super.onResume()
-        webView!!.onResume()
+    private fun calculateMaxAmplitude(audioBuffer: ShortArray): Int {
+        var max = 0
+        for (sample in audioBuffer) {
+            val amplitude = Math.abs(sample.toInt())
+            if (amplitude > max) {
+                max = amplitude
+            }
+        }
+        return max
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        // Remove the updateRunnable callbacks to prevent memory leaks
-        handler.removeCallbacks(updateRunnable)
+    private fun updateUI(amplitude: Int) {
+        handler.post {
+            // Update your UI elements (e.g., progress bar, waveform) with amplitude
+        }
+    }
+
+    companion object {
+        private const val SAMPLE_RATE = 44100
+        private const val BUFFER_SIZE = 1024
     }
 }
