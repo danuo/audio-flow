@@ -9,6 +9,26 @@ class MainActivity : ComponentActivity() {
     private var webView: WebView? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)  // Set the layout XML
+
+        webView = findViewById(R.id.webView)
+        webView!!.settings.javaScriptEnabled = true
+        webView!!.loadUrl("https://www.example.com")
+
+        // Set up WebViewClient to handle page navigation within the WebView
+        webView!!.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
+                view.loadUrl(url)
+                return true
+            }
+        }
+    }
+}
+
+class Test : ComponentActivity() {
+    private var webView: WebView? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         webView = WebView(this)
         setContentView(webView)
         webView!!.settings.javaScriptEnabled = true
