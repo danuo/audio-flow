@@ -1,43 +1,35 @@
 package com.example.audio_meter
 
 import android.os.Bundle
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.audio_meter.ui.theme.AudiometerTheme
 
 class MainActivity : ComponentActivity() {
+    private var webView: WebView? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            AudiometerTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    Greeting("Android")
-                }
+        webView = WebView(this)
+        setContentView(webView)
+        webView!!.settings.javaScriptEnabled = true
+        webView!!.loadUrl("https://www.example.com")
+
+        // Set up WebViewClient to handle page navigation within the WebView
+        webView!!.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
+                view.loadUrl(url)
+                return true
             }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-            text = "Hello you",
-            modifier = modifier
-    )
-}
+    override fun onPause() {
+        super.onPause()
+        webView!!.onPause()
+    }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AudiometerTheme {
-        Greeting("Android")
+    override fun onResume() {
+        super.onResume()
+        webView!!.onResume()
     }
 }
