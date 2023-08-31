@@ -1,14 +1,22 @@
 package com.example.audio_meter
-
+import android.Manifest
 import android.os.Bundle
 import android.os.Handler
 import android.widget.TextView
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Button
 import androidx.activity.ComponentActivity
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import kotlin.math.abs
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+
+
+
 
 class MainActivity : ComponentActivity() {
 
@@ -26,6 +34,14 @@ class MainActivity : ComponentActivity() {
             AudioFormat.CHANNEL_IN_MONO,
             AudioFormat.ENCODING_PCM_16BIT
         )
+        val audioPermissionCode = 1
+        if (!checkRecordPermission()) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.RECORD_AUDIO),
+                audioPermissionCode
+            )
+        }
         audioRecord = AudioRecord(
             MediaRecorder.AudioSource.MIC,
             SAMPLE_RATE,
@@ -33,6 +49,9 @@ class MainActivity : ComponentActivity() {
             AudioFormat.ENCODING_PCM_16BIT,
             minBufferSize
         )
+
+        val startButton = findViewById<Button>(R.id.startButton)
+        val stopButton = findViewById<Button>(R.id.stopButton)
 
         startButton.setOnClickListener {
             isRecording = true
@@ -44,6 +63,12 @@ class MainActivity : ComponentActivity() {
             isRecording = false
             audioRecord.stop()
         }
+    }
+
+    private fun checkRecordPermission(): Boolean {
+        val permission = Manifest.permission.RECORD_AUDIO
+        val permissionCheck = ContextCompat.checkSelfPermission(this, permission)
+        return permissionCheck == PackageManager.PERMISSION_GRANTED
     }
 
     private fun updateVoiceLevel() {
@@ -60,7 +85,7 @@ class MainActivity : ComponentActivity() {
     private fun calculateMaxAmplitude(audioBuffer: ShortArray): Int {
         var max = 0
         for (sample in audioBuffer) {
-            val amplitude = Math.abs(sample.toInt())
+            val amplitude = abs(sample.toInt())
             if (amplitude > max) {
                 max = amplitude
             }
