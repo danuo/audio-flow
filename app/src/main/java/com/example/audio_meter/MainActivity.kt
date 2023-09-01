@@ -21,16 +21,12 @@ import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
 
-
     private lateinit var amplitudeTextView: TextView
-
     private val handler = Handler(Looper.getMainLooper())
     private val nLeds = 10
     private val nLedsOragne = nLeds - 1
     private val nLedsGreen = nLedsOragne / 2
-
     private lateinit var audioRecorder: AudioRecorder
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val minBufferSize = AudioRecord.getMinBufferSize(
@@ -49,14 +45,11 @@ class MainActivity : ComponentActivity() {
             minBufferSize
         )
 
-        audioRecorder = AudioRecorder(audioRecord)
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        audioRecorder = AudioRecorder(audioRecord)
         val startButton = findViewById<Button>(R.id.startButton)
         amplitudeTextView = findViewById<TextView>(R.id.amplitudeText)
-
         startButton.setOnClickListener {
             audioRecorder.toggleRecording()
             if (audioRecorder.isRecording) {
@@ -100,23 +93,17 @@ class MainActivity : ComponentActivity() {
             val randomInRange = Random.nextInt(1, 10000)
             val amplitudeText = "Amplitude: $amplitude random number: $randomInRange"
             amplitudeTextView.text = amplitudeText
-
             val amplitudeTemp = randomInRange
-
             val audioMeterLayout = findViewById<LinearLayout>(R.id.audioMeterLayout)
-
             val thresh: Int = amplitudeTemp / 1000
             for (index in 0 until nLeds) {
                 val led = audioMeterLayout.getChildAt(index) as View
                 if (index < thresh) {
                     led.setBackgroundColor(getColorForAudioLevelOn(amplitudeTemp))
-
                 } else {
                     led.setBackgroundColor(getColorForAudioLevelOff(amplitudeTemp))
-
                 }
             }
-
         }
     }
 
