@@ -6,14 +6,14 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.TextView
 import android.widget.Button
-import androidx.activity.ComponentActivity
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
-import kotlin.math.abs
 import android.content.pm.PackageManager
+import androidx.activity.ComponentActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import kotlin.math.abs
 import kotlin.random.Random
 
 
@@ -97,9 +97,8 @@ class MainActivity : ComponentActivity() {
     private fun updateUI(amplitude: Int) {
         handler.post {
             val randomInRange = Random.nextInt(1, 101)
-            val amplitudeText = "Amplitude: $amplitude"
-            val amplitudeText2 = "Amplitude: $randomInRange"
-            amplitudeTextView.text = amplitudeText2
+            val amplitudeText = "Amplitude: $amplitude random number: $randomInRange"
+            amplitudeTextView.text = amplitudeText
         }
     }
 
