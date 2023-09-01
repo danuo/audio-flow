@@ -62,8 +62,11 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
+        private const val REFRESH_RATE = 10
         private const val SAMPLE_RATE = 44100
-        private const val BUFFER_SIZE = 1024
+
+        // private const val BUFFER_SIZE = 1024
+        private const val BUFFER_SIZE = (SAMPLE_RATE / REFRESH_RATE).toInt()
     }
 
     private fun updateVoiceLevel() {
