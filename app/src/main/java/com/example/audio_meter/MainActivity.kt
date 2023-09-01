@@ -1,10 +1,10 @@
 package com.example.audio_meter
+
 import android.Manifest
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.widget.TextView
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.Button
 import androidx.activity.ComponentActivity
 import android.media.AudioFormat
@@ -14,15 +14,15 @@ import kotlin.math.abs
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-
-
+import kotlin.random.Random
 
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var audioRecord: AudioRecord
+    private lateinit var amplitudeTextView: TextView
     private var isRecording = false
-    private val handler = Handler()
+    private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +52,7 @@ class MainActivity : ComponentActivity() {
 
         val startButton = findViewById<Button>(R.id.startButton)
         val stopButton = findViewById<Button>(R.id.stopButton)
+        amplitudeTextView = findViewById<TextView>(R.id.amplitudeText)
 
         startButton.setOnClickListener {
             isRecording = true
@@ -95,7 +96,10 @@ class MainActivity : ComponentActivity() {
 
     private fun updateUI(amplitude: Int) {
         handler.post {
-            // Update your UI elements (e.g., progress bar, waveform) with amplitude
+            val randomInRange = Random.nextInt(1, 101)
+            val amplitudeText = "Amplitude: $amplitude"
+            val amplitudeText2 = "Amplitude: $randomInRange"
+            amplitudeTextView.text = amplitudeText2
         }
     }
 
