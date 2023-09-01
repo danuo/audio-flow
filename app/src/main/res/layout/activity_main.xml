@@ -29,7 +29,8 @@
         android:id="@+id/audioMeterLayout"
         android:layout_below="@id/amplitudeText"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <View
             android:layout_width="0dp"
@@ -60,7 +61,36 @@
             android:layout_height="50dp"
             android:layout_weight="1"
             android:background="#CCCCCC" />
-        <!-- Add LEDs here -->
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:background="#CCCCCC" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:background="#CCCCCC" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:background="#CCCCCC" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:background="#CCCCCC" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:background="#CCCCCC" />
     </LinearLayout>
 
 </RelativeLayout>
