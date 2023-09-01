@@ -1,6 +1,10 @@
 package com.example.audio_meter
 
 import android.Manifest
+import android.content.pm.PackageManager
+import android.media.AudioFormat
+import android.media.AudioRecord
+import android.media.MediaRecorder
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -8,10 +12,6 @@ import android.widget.TextView
 import android.widget.Button
 import android.widget.LinearLayout
 import android.view.View
-import android.media.AudioFormat
-import android.media.AudioRecord
-import android.media.MediaRecorder
-import android.content.pm.PackageManager
 import androidx.activity.ComponentActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -21,33 +21,27 @@ import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
 
-    private lateinit var audioRecord: AudioRecord
+
     private lateinit var amplitudeTextView: TextView
-    private var isRecording = false
+
     private val handler = Handler(Looper.getMainLooper())
     private val nLeds = 10
     private val nLedsOragne = nLeds - 1
     private val nLedsGreen = nLedsOragne / 2
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+    private lateinit var audioRecorder: AudioRecorder
 
-        // Initialize audioRecord with appropriate settings
+
+    override fun onCreate(savedInstanceState: Bundle?) {
         val minBufferSize = AudioRecord.getMinBufferSize(
             SAMPLE_RATE,
             AudioFormat.CHANNEL_IN_MONO,
             AudioFormat.ENCODING_PCM_16BIT
         )
-        val audioPermissionCode = 1
-        if (!checkRecordPermission()) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.RECORD_AUDIO),
-                audioPermissionCode
-            )
-        }
-        audioRecord = AudioRecord(
+
+        checkRecordPermission()
+
+        val audioRecord = AudioRecord(
             MediaRecorder.AudioSource.MIC,
             SAMPLE_RATE,
             AudioFormat.CHANNEL_IN_MONO,
@@ -55,37 +49,35 @@ class MainActivity : ComponentActivity() {
             minBufferSize
         )
 
+        audioRecorder = AudioRecorder(audioRecord)
+
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
         val startButton = findViewById<Button>(R.id.startButton)
-        val stopButton = findViewById<Button>(R.id.stopButton)
         amplitudeTextView = findViewById<TextView>(R.id.amplitudeText)
 
         startButton.setOnClickListener {
-            if (!isRecording) {
-                isRecording = true
-                audioRecord.startRecording()
+            audioRecorder.toggleRecording()
+            if (audioRecorder.isRecording) {
+                startButton.text = "Stop Recording"
                 updateVoiceLevel()
-            }
-        }
-
-        stopButton.setOnClickListener {
-            if (isRecording) {
-                isRecording = false
-                audioRecord.stop()
+            } else {
+                startButton.text = "Start Recording"
             }
         }
     }
 
-    private fun checkRecordPermission(): Boolean {
-        val permission = Manifest.permission.RECORD_AUDIO
-        val permissionCheck = ContextCompat.checkSelfPermission(this, permission)
-        return permissionCheck == PackageManager.PERMISSION_GRANTED
+    companion object {
+        private const val SAMPLE_RATE = 44100
+        private const val BUFFER_SIZE = 1024
     }
 
     private fun updateVoiceLevel() {
         Thread {
             val audioBuffer = ShortArray(BUFFER_SIZE)
-            while (isRecording) {
-                audioRecord.read(audioBuffer, 0, BUFFER_SIZE)
+            while (audioRecorder.isRecording) {
+                audioRecorder.audioRecord.read(audioBuffer, 0, BUFFER_SIZE)
                 val maxAmplitude = calculateMaxAmplitude(audioBuffer)
                 updateUI(maxAmplitude)
             }
@@ -148,8 +140,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    companion object {
-        private const val SAMPLE_RATE = 44100
-        private const val BUFFER_SIZE = 1024
+    private fun checkRecordPermission() {
+        val permission = Manifest.permission.RECORD_AUDIO
+        val permissionCheck = ContextCompat.checkSelfPermission(this, permission)
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.RECORD_AUDIO),
+                1
+            )
+        }
     }
 }
