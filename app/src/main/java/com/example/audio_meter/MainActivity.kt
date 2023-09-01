@@ -55,14 +55,18 @@ class MainActivity : ComponentActivity() {
         amplitudeTextView = findViewById<TextView>(R.id.amplitudeText)
 
         startButton.setOnClickListener {
-            isRecording = true
-            audioRecord.startRecording()
-            updateVoiceLevel()
+            if (!isRecording) {
+                isRecording = true
+                audioRecord.startRecording()
+                updateVoiceLevel()
+            }
         }
 
         stopButton.setOnClickListener {
-            isRecording = false
-            audioRecord.stop()
+            if (isRecording) {
+                isRecording = false
+                audioRecord.stop()
+            }
         }
     }
 
