@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.kapt")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -62,7 +62,7 @@ android {
 dependencies {
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
-    implementation("androidx.activity:activity-compose:1.7.1")
+    implementation("androidx.activity:activity-compose:1.7.2")
     implementation(platform("androidx.compose:compose-bom:2023.08.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
@@ -81,7 +81,7 @@ dependencies {
 
     // Room components
     implementation("androidx.room:room-ktx:2.5.2")
-    kapt("androidx.room:room-compiler:2.5.2")
+    ksp("androidx.room:room-compiler:2.5.2")
     androidTestImplementation("androidx.room:room-testing:2.5.2")
 
     // Lifecycle components
