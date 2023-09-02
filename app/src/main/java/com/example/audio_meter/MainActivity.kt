@@ -34,12 +34,17 @@ class MainActivity : ComponentActivity() {
         initAudio()
         initUI()
         initDB()
+        initServer()
     }
 
     companion object {
         private const val REFRESH_RATE = 10
         private const val SAMPLE_RATE = 44100
         private const val BUFFER_SIZE = (SAMPLE_RATE / REFRESH_RATE).toInt()  // before: 1024
+    }
+
+    private fun initServer() {
+        val server = Server()
     }
 
     private fun initAudio() {

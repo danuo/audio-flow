@@ -55,6 +55,8 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/INDEX.LIST"
+            excludes += "/META-INF/io.netty.versions.properties"
         }
     }
 }
@@ -97,4 +99,9 @@ dependencies {
     // UI
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("com.google.android.material:material:1.9.0")
+
+    // Server
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("io.ktor:ktor-server-core-jvm:2.3.4")
+    implementation("io.ktor:ktor-server-netty-jvm:2.3.4")
 }
