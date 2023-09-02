@@ -11,7 +11,6 @@ import android.os.Looper
 import android.widget.TextView
 import android.widget.Button
 import android.widget.LinearLayout
-import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -25,9 +24,13 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var amplitudeTextView: TextView
     private lateinit var tempTextView: TextView
+    private lateinit var audioMeterLayout: LinearLayout
+
+
     private lateinit var audioRecorder: AudioRecorder
     private lateinit var databaseHandler: DatabaseHandler
-    private val handler = Handler(Looper.getMainLooper())
+    private lateinit var dataHandler: DataHandler
+    val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,12 +40,13 @@ class MainActivity : ComponentActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             initServer(databaseHandler)
         }
+        dataHandler = DataHandler(this, amplitudeTextView, audioMeterLayout)
     }
 
     companion object {
-        private const val NLEDS = 10
-        private const val NLEDS_ORANGE = NLEDS - 1
-        private const val NLEDS_GREEN = NLEDS_ORANGE / 2
+        const val NLEDS = 10
+        const val NLEDS_ORANGE = NLEDS - 1
+        const val NLEDS_GREEN = NLEDS_ORANGE / 2
         private const val REFRESH_RATE = 10
         private const val SAMPLE_RATE = 44100
         private const val BUFFER_SIZE = (SAMPLE_RATE / REFRESH_RATE).toInt()  // before: 1024
@@ -72,9 +76,10 @@ class MainActivity : ComponentActivity() {
 
     private fun initUI() {
         setContentView(R.layout.activity_main)
-        val startButton = findViewById<Button>(R.id.startButton)
         amplitudeTextView = findViewById<TextView>(R.id.amplitudeText)
         tempTextView = findViewById<TextView>(R.id.tempText)
+        audioMeterLayout = findViewById<LinearLayout>(R.id.audioMeterLayout)
+        val startButton = findViewById<Button>(R.id.startButton)
         startButton.setOnClickListener {
             audioRecorder.toggleRecording()
             if (audioRecorder.isRecording) {
@@ -96,7 +101,7 @@ class MainActivity : ComponentActivity() {
             while (audioRecorder.isRecording) {
                 audioRecorder.audioRecord.read(audioBuffer, 0, BUFFER_SIZE)
                 val maxAmplitude = calculateMaxAmplitude(audioBuffer)
-                updateUI(maxAmplitude)
+                dataHandler.updateUI(maxAmplitude)
             }
         }.start()
     }
@@ -112,42 +117,6 @@ class MainActivity : ComponentActivity() {
         return max
     }
 
-    private fun updateUI(amplitude: Int) {
-        handler.post {
-            val amplitudeText = "Amplitude: $amplitude"
-            amplitudeTextView.text = amplitudeText
-            val audioMeterLayout = findViewById<LinearLayout>(R.id.audioMeterLayout)
-            val thresh: Int = amplitude / 1000
-            for (index in 0 until NLEDS) {
-                val led = audioMeterLayout.getChildAt(index) as View
-                if (index < thresh) {
-                    led.setBackgroundColor(getColorForAudioLevelOn(amplitude))
-                } else {
-                    led.setBackgroundColor(getColorForAudioLevelOff(amplitude))
-                }
-            }
-        }
-    }
-
-    private fun getColorForAudioLevelOn(amplitude: Int): Int {
-        return if (amplitude > 10000) {
-            0xFFFF0000.toInt() // red
-        } else if (amplitude > 7000) {
-            0xFFff4433.toInt() // orange
-        } else {
-            0xFF008000.toInt() // green
-        }
-    }
-
-    private fun getColorForAudioLevelOff(amplitude: Int): Int {
-        return if (amplitude > 10000) {
-            0xFF400000.toInt() // red
-        } else if (amplitude > 7000) {
-            0xFF40110D.toInt() // orange
-        } else {
-            0xFF002000.toInt() // green
-        }
-    }
 
     private fun checkRecordPermission() {
         val permission = Manifest.permission.RECORD_AUDIO

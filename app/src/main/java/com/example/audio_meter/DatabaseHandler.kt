@@ -48,7 +48,7 @@ interface ValueDao {
 
 // Annotates class to be a Room Database with a table (entity) of the Word class
 @Database(entities = [Value::class], version = 1, exportSchema = false)
-public abstract class ValueDatabase : RoomDatabase() {
+abstract class ValueDatabase : RoomDatabase() {
 
     abstract fun valueDao(): ValueDao
 
@@ -123,14 +123,12 @@ class WordViewModelFactory(private val repository: ValueRepository) : ViewModelP
 }
 
 
-class DatabaseHandler(private val context: ComponentActivity, private val textView: TextView) {
+class DatabaseHandler(context: ComponentActivity, private val textView: TextView) {
     private val database = ValueDatabase.getDatabase(context)
     private val repository = ValueRepository(database.valueDao())
 
     private val viewModel = ValueViewModel(repository)
     // private val viewModel = ViewModelProvider(context)[ValueViewModel::class.java]
-
-    val allValues = viewModel.allValues
 
     var newestData = listOf<Value>()
 
@@ -153,12 +151,17 @@ class DatabaseHandler(private val context: ComponentActivity, private val textVi
         generateRandomData()
     }
 
+    fun insertData(value: Float) {
+        val time: Long = System.currentTimeMillis() + Random.nextInt(-10000, 10000)
+        viewModel.insert(Value(time = time, value = value))
+    }
+
     private fun generateRandomData() {
         for (i in 0 until 10) {
             val time: Long = System.currentTimeMillis() + Random.nextInt(-10000, 10000)
             val value: Float = Random.nextFloat() * 2f.pow(16)
             val testValue = Value(time = time, value = value)
-            viewModel.insert((testValue))
+            viewModel.insert(testValue)
         }
     }
 
