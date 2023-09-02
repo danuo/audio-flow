@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             initServer(databaseHandler)
         }
-        dataHandler = DataHandler(this, amplitudeTextView, audioMeterLayout)
+        dataHandler = DataHandler(this, databaseHandler, amplitudeTextView, audioMeterLayout)
     }
 
     companion object {

@@ -5,13 +5,19 @@ import android.widget.LinearLayout
 import android.widget.TextView
 
 class DataHandler(
-    private val context: MainActivity, private val amplitudeTextView: TextView,
+    private val context: MainActivity,
+    private val databaseHandler: DatabaseHandler,
+    private val amplitudeTextView: TextView,
     private val audioMeterLayout: LinearLayout
 ) {
-
+    private val nGroup: Int = 50
+    private var counter: Int = 0
+    private var valSum: Float = 0f
 
     fun updateUI(amplitude: Int) {
         context.handler.post {
+            addToMean(amplitude)
+
             val amplitudeText = "Amplitude: $amplitude"
             amplitudeTextView.text = amplitudeText
 
@@ -24,6 +30,17 @@ class DataHandler(
                     led.setBackgroundColor(getColorForAudioLevelOff(amplitude))
                 }
             }
+        }
+    }
+
+    private fun addToMean(amplitude: Int) {
+        valSum += amplitude
+        counter += 1
+        if (counter == nGroup) {
+            var avg = valSum / nGroup
+            counter = 0
+            valSum = 0f
+            databaseHandler.insertData(avg)
         }
     }
 
