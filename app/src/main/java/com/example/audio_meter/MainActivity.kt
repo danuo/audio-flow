@@ -22,6 +22,7 @@ import kotlin.random.Random
 class MainActivity : ComponentActivity() {
 
     private lateinit var amplitudeTextView: TextView
+    private lateinit var tempTextView: TextView
     private val handler = Handler(Looper.getMainLooper())
     private val nLeds = 10
     private val nLedsOragne = nLeds - 1
@@ -32,6 +33,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         initAudio()
         initUI()
+        initDB()
     }
 
     companion object {
@@ -61,6 +63,7 @@ class MainActivity : ComponentActivity() {
         setContentView(R.layout.activity_main)
         val startButton = findViewById<Button>(R.id.startButton)
         amplitudeTextView = findViewById<TextView>(R.id.amplitudeText)
+        tempTextView = findViewById<TextView>(R.id.tempText)
         startButton.setOnClickListener {
             audioRecorder.toggleRecording()
             if (audioRecorder.isRecording) {
@@ -70,6 +73,10 @@ class MainActivity : ComponentActivity() {
                 startButton.text = "Start Recording"
             }
         }
+    }
+
+    private fun initDB() {
+        val db = DatabaseHandler(context = this, textView = tempTextView)
     }
 
     private fun updateVoiceLevel() {

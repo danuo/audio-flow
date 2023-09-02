@@ -10,6 +10,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.Room
 import android.content.Context
+import android.widget.TextView
 import androidx.annotation.WorkerThread
 import kotlin.random.Random
 import kotlin.math.pow
@@ -20,6 +21,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import android.util.Log
+import androidx.activity.ComponentActivity
 
 
 @Entity(tableName = "data_table")
@@ -121,14 +124,41 @@ class WordViewModelFactory(private val repository: ValueRepository) : ViewModelP
 }
 
 
-class DatabaseHandler {
+class DatabaseHandler(private val context: ComponentActivity, private val textView: TextView) {
+    private val database = ValueDatabase.getDatabase(context)
+    private val repository = ValueRepository(database.valueDao())
+
+    private val viewModel = ValueViewModel(repository)
+    // private val viewModel = ViewModelProvider(context)[ValueViewModel::class.java]
+
+    init {
+        generateRandomData()
+        addText("randomstuff")
+        addText("randomstuff")
+        viewModel.allValues.observe(context) { data ->
+            addText(data[0].value.toString())
+            addText("size")
+            addText(data.size.toString())
+            //for (dat in data) {
+            //    addText((dat.value.toString()))
+            //}
+            addText("added something")
+        }
+        // Log.d("DatabaseHandler", x.toString())
+        generateRandomData()
+        generateRandomData()
+    }
+
     private fun generateRandomData() {
         for (i in 0 until 10) {
             val time: Long = System.currentTimeMillis() + Random.nextInt(-10000, 10000)
             val value: Float = Random.nextFloat() * 2f.pow(16)
             val testValue = Value(time = time, value = value)
-
+            viewModel.insert((testValue))
         }
     }
 
+    private fun addText(text: String) {
+        textView.text = textView.text.toString() + text
+    }
 }

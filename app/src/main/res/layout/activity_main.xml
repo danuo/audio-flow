@@ -86,4 +86,12 @@
             android:background="#CCCCCC" />
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/tempText"
+        android:layout_below="@id/audioMeterLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="temp very long string bla bla bla bla blabla bla bla bla bla"
+        android:textSize="18sp"
+        android:padding="20dp" />
 </RelativeLayout>
