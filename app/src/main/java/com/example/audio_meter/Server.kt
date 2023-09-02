@@ -27,10 +27,10 @@ class Server {
         startServer()
     }
 
-    private fun startServer() {
+    fun startServer() {
 
         println("Starting CustomServer")
-        embeddedServer(Netty, port = 8080) {
+        embeddedServer(Netty, port = 4444) {
             extracted()
         }.start(wait = true)
     }

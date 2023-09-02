@@ -17,27 +17,32 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlin.math.abs
 import kotlin.random.Random
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var amplitudeTextView: TextView
     private lateinit var tempTextView: TextView
-    private val handler = Handler(Looper.getMainLooper())
-    private val nLeds = 10
-    private val nLedsOragne = nLeds - 1
-    private val nLedsGreen = nLedsOragne / 2
     private lateinit var audioRecorder: AudioRecorder
+    private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initAudio()
         initUI()
         initDB()
-        initServer()
+        CoroutineScope(Dispatchers.IO).launch {
+            initServer()
+        }
     }
 
     companion object {
+        private const val NLEDS = 10
+        private const val NLEDS_ORANGE = NLEDS - 1
+        private const val NLEDS_GREEN = NLEDS_ORANGE / 2
         private const val REFRESH_RATE = 10
         private const val SAMPLE_RATE = 44100
         private const val BUFFER_SIZE = (SAMPLE_RATE / REFRESH_RATE).toInt()  // before: 1024
@@ -45,6 +50,7 @@ class MainActivity : ComponentActivity() {
 
     private fun initServer() {
         val server = Server()
+        server.startServer()
     }
 
     private fun initAudio() {
@@ -114,7 +120,7 @@ class MainActivity : ComponentActivity() {
             val amplitudeTemp = randomInRange
             val audioMeterLayout = findViewById<LinearLayout>(R.id.audioMeterLayout)
             val thresh: Int = amplitudeTemp / 1000
-            for (index in 0 until nLeds) {
+            for (index in 0 until NLEDS) {
                 val led = audioMeterLayout.getChildAt(index) as View
                 if (index < thresh) {
                     led.setBackgroundColor(getColorForAudioLevelOn(amplitudeTemp))
