@@ -29,14 +29,24 @@ class MainActivity : ComponentActivity() {
     private lateinit var audioRecorder: AudioRecorder
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        initAudio()
+        initUI()
+    }
+
+    companion object {
+        private const val REFRESH_RATE = 10
+        private const val SAMPLE_RATE = 44100
+        private const val BUFFER_SIZE = (SAMPLE_RATE / REFRESH_RATE).toInt()  // before: 1024
+    }
+
+    private fun initAudio() {
+        checkRecordPermission()
         val minBufferSize = AudioRecord.getMinBufferSize(
             SAMPLE_RATE,
             AudioFormat.CHANNEL_IN_MONO,
             AudioFormat.ENCODING_PCM_16BIT
         )
-
-        checkRecordPermission()
-
         val audioRecord = AudioRecord(
             MediaRecorder.AudioSource.MIC,
             SAMPLE_RATE,
@@ -44,10 +54,11 @@ class MainActivity : ComponentActivity() {
             AudioFormat.ENCODING_PCM_16BIT,
             minBufferSize
         )
-
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
         audioRecorder = AudioRecorder(audioRecord)
+    }
+
+    private fun initUI() {
+        setContentView(R.layout.activity_main)
         val startButton = findViewById<Button>(R.id.startButton)
         amplitudeTextView = findViewById<TextView>(R.id.amplitudeText)
         startButton.setOnClickListener {
@@ -59,14 +70,6 @@ class MainActivity : ComponentActivity() {
                 startButton.text = "Start Recording"
             }
         }
-    }
-
-    companion object {
-        private const val REFRESH_RATE = 10
-        private const val SAMPLE_RATE = 44100
-
-        // private const val BUFFER_SIZE = 1024
-        private const val BUFFER_SIZE = (SAMPLE_RATE / REFRESH_RATE).toInt()
     }
 
     private fun updateVoiceLevel() {
