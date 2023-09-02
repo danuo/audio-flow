@@ -16,7 +16,6 @@ import androidx.activity.ComponentActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlin.math.abs
-import kotlin.random.Random
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -115,18 +114,16 @@ class MainActivity : ComponentActivity() {
 
     private fun updateUI(amplitude: Int) {
         handler.post {
-            val randomInRange = Random.nextInt(1, 10000)
-            val amplitudeText = "Amplitude: $amplitude random number: $randomInRange"
+            val amplitudeText = "Amplitude: $amplitude"
             amplitudeTextView.text = amplitudeText
-            val amplitudeTemp = randomInRange
             val audioMeterLayout = findViewById<LinearLayout>(R.id.audioMeterLayout)
-            val thresh: Int = amplitudeTemp / 1000
+            val thresh: Int = amplitude / 1000
             for (index in 0 until NLEDS) {
                 val led = audioMeterLayout.getChildAt(index) as View
                 if (index < thresh) {
-                    led.setBackgroundColor(getColorForAudioLevelOn(amplitudeTemp))
+                    led.setBackgroundColor(getColorForAudioLevelOn(amplitude))
                 } else {
-                    led.setBackgroundColor(getColorForAudioLevelOff(amplitudeTemp))
+                    led.setBackgroundColor(getColorForAudioLevelOff(amplitude))
                 }
             }
         }
