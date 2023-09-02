@@ -8,7 +8,7 @@ import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
-class Server {
+class Server(private val databaseHandler: DatabaseHandler) {
     private val temperatureDataTemp = listOf(
         Pair(System.currentTimeMillis() - 600000, 22.5), // 10 minutes ago
         Pair(System.currentTimeMillis() - 540000, 23.0), // 9.5 minutes ago
@@ -42,13 +42,26 @@ class Server {
             }
 
             get("/data") {
-                val data = mapOf("time" to temperatureDataTemp.map { it.first },
-                    "values" to temperatureDataTemp.map { it.second })
+                var data = getDataDummy()
+                data = getDataFromDatabase()
                 call.respondText(
                     gson.toJson(data)
                 )
             }
         }
+    }
+
+    private fun getDataDummy(): Map<String, List<Any>> {
+        return mapOf("time" to temperatureDataTemp.map { it.first },
+            "values" to temperatureDataTemp.map { it.second })
+    }
+
+    private fun getDataFromDatabase(): Map<String, List<Any>> {
+        val data = databaseHandler.newestData
+
+        println("test")
+        return mapOf<String, List<Any>>("time" to data.map { it.time },
+            "values" to data.map { it.value })
     }
 
     fun generateHtml(temperatureData: List<Pair<Long, Double>>): String {

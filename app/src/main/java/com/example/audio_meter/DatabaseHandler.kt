@@ -21,7 +21,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import android.util.Log
 import androidx.activity.ComponentActivity
 
 
@@ -131,11 +130,16 @@ class DatabaseHandler(private val context: ComponentActivity, private val textVi
     private val viewModel = ValueViewModel(repository)
     // private val viewModel = ViewModelProvider(context)[ValueViewModel::class.java]
 
+    val allValues = viewModel.allValues
+
+    var newestData = listOf<Value>()
+
     init {
         generateRandomData()
         addText("randomstuff")
         addText("randomstuff")
         viewModel.allValues.observe(context) { data ->
+            newestData = data
             addText(data[0].value.toString())
             addText("size")
             addText(data.size.toString())

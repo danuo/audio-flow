@@ -27,15 +27,16 @@ class MainActivity : ComponentActivity() {
     private lateinit var amplitudeTextView: TextView
     private lateinit var tempTextView: TextView
     private lateinit var audioRecorder: AudioRecorder
+    private lateinit var databaseHandler: DatabaseHandler
     private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initAudio()
         initUI()
-        initDB()
+        databaseHandler = initDB()
         CoroutineScope(Dispatchers.IO).launch {
-            initServer()
+            initServer(databaseHandler)
         }
     }
 
@@ -48,8 +49,8 @@ class MainActivity : ComponentActivity() {
         private const val BUFFER_SIZE = (SAMPLE_RATE / REFRESH_RATE).toInt()  // before: 1024
     }
 
-    private fun initServer() {
-        val server = Server()
+    private fun initServer(databaseHandler: DatabaseHandler) {
+        val server = Server(databaseHandler)
         server.startServer()
     }
 
@@ -86,8 +87,8 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun initDB() {
-        val db = DatabaseHandler(context = this, textView = tempTextView)
+    private fun initDB(): DatabaseHandler {
+        return DatabaseHandler(context = this, textView = tempTextView)
     }
 
     private fun updateVoiceLevel() {
