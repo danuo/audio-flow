@@ -4,25 +4,51 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 
+const val N_LEDS = 10
+const val N_LEDS_ORANGE = N_LEDS - 1
+const val N_LEDS_GREEN = N_LEDS_ORANGE / 2
+
 class UiHandler(
     private val context: MainActivity,
     private val amplitudeTextView: TextView,
     private val audioMeterLayout: LinearLayout
 ) {
 
-    fun updateUI(amplitude: Int) {
-        context.handler.post {
-            val amplitudeText = "Amplitude: $amplitude"
-            amplitudeTextView.text = amplitudeText
+    private var amplitude: Int = 10
+    private var nSamples: Int = 0
 
-            val thresh: Int = amplitude / 1000
-            for (index in 0 until MainActivity.NLEDS) {
-                val led = audioMeterLayout.getChildAt(index) as View
-                if (index < thresh) {
-                    led.setBackgroundColor(getColorForAudioLevelOn(amplitude))
-                } else {
-                    led.setBackgroundColor(getColorForAudioLevelOff(amplitude))
-                }
+    fun updateUI(data: Map<String, Int>) {
+        if (data.containsKey("amplitude")) {
+            amplitude = data["amplitude"]!!
+        }
+        if (data.containsKey("nSamples")) {
+            nSamples = data["nSamples"]!!
+        }
+
+        updateText()
+        updateLeds()
+    }
+
+    private fun updateText() {
+        context.handler.post {
+            val outText = "Amplitude: $amplitude, nSamples: $nSamples"
+            amplitudeTextView.text = outText
+        }
+    }
+
+    private fun updateLeds() {
+        context.handler.post {
+            val outText = "Amplitude: $amplitude, nSamples: $nSamples"
+            amplitudeTextView.text = outText
+        }
+
+        val thresh: Int = amplitude / 1000
+        for (index in 0 until N_LEDS) {
+            val led = audioMeterLayout.getChildAt(index) as View
+            if (index < thresh) {
+                led.setBackgroundColor(getColorForAudioLevelOn(amplitude))
+            } else {
+                led.setBackgroundColor(getColorForAudioLevelOff(amplitude))
             }
         }
     }

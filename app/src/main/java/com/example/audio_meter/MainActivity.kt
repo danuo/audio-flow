@@ -27,13 +27,10 @@ class MainActivity : ComponentActivity() {
     private lateinit var amplitudeTextView: TextView
     private lateinit var tempTextView: TextView
     private lateinit var audioMeterLayout: LinearLayout
-
-
     private lateinit var audioRecorder: AudioRecorder
     private lateinit var databaseHandler: DatabaseHandler
     private lateinit var uiHandler: UiHandler
     val handler = Handler(Looper.getMainLooper())
-
     private val nGroup: Int = 30  // every 3 seconds
     private var counter: Int = 0
     private var valSum: Float = 0f
@@ -42,23 +39,20 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         initAudio()
         initUI()
-        databaseHandler = initDB()
+        initDB(uiHandler)
         CoroutineScope(Dispatchers.IO).launch {
             initServer(databaseHandler)
         }
     }
 
     companion object {
-        const val NLEDS = 10
-        private const val NLEDS_ORANGE = NLEDS - 1
-        const val NLEDS_GREEN = NLEDS_ORANGE / 2
         private const val REFRESH_RATE = 10
         private const val SAMPLE_RATE = 44100
         private const val BUFFER_SIZE = (SAMPLE_RATE / REFRESH_RATE)  // before: 1024
     }
 
     private fun processAmplitude(amplitude: Int) {
-        uiHandler.updateUI(amplitude)
+        uiHandler.updateUI(mapOf("amplitude" to amplitude))
         addToMean(amplitude)
     }
 
@@ -136,8 +130,9 @@ class MainActivity : ComponentActivity() {
         alert.show()
     }
 
-    private fun initDB(): DatabaseHandler {
-        return DatabaseHandler(context = this, textView = tempTextView)
+    private fun initDB(uiHandler: UiHandler) {
+        databaseHandler =
+            DatabaseHandler(context = this, uiHandler = uiHandler, textView = tempTextView)
     }
 
     private fun getAmplitude() {

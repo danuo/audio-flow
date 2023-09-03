@@ -14,7 +14,6 @@ import android.content.Context
 import android.widget.TextView
 import androidx.annotation.WorkerThread
 import kotlin.random.Random
-import kotlin.math.pow
 import kotlinx.coroutines.flow.Flow
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
@@ -133,7 +132,11 @@ class WordViewModelFactory(private val repository: ValueRepository) : ViewModelP
 }
 
 
-class DatabaseHandler(context: ComponentActivity, private val textView: TextView) {
+class DatabaseHandler(
+    context: ComponentActivity,
+    private val uiHandler: UiHandler,
+    private val textView: TextView
+) {
     private val database = ValueDatabase.getDatabase(context)
     private val repository = ValueRepository(database.valueDao())
     private val viewModel = ValueViewModel(repository)
@@ -142,24 +145,14 @@ class DatabaseHandler(context: ComponentActivity, private val textView: TextView
     var newestData = listOf<Value>()
 
     init {
-        generateRandomData()
-        addText("randomstuff")
-        addText("randomstuff")
         viewModel.allValues.observe(context) { data ->
             newestData = data
             if (data.isNotEmpty()) {
-                addText(data[0].value.toString())
-                addText("size")
-                addText(data.size.toString())
-                //for (dat in data) {
-                //    addText((dat.value.toString()))
-                //}
-                addText("added something")
+                uiHandler.updateUI(mapOf("nSamples" to data.size))
             }
         }
         // Log.d("DatabaseHandler", x.toString())
-        generateRandomData()
-        generateRandomData()
+        addText("some text")
     }
 
     fun insertData(value: Float) {
@@ -170,15 +163,6 @@ class DatabaseHandler(context: ComponentActivity, private val textView: TextView
     fun deleteAll() {
         newestData = listOf()
         viewModel.deleteAll()
-    }
-
-    private fun generateRandomData() {
-        for (i in 0 until 10) {
-            val time: Long = System.currentTimeMillis() + Random.nextInt(-10000, 10000)
-            val value: Float = Random.nextFloat() * 2f.pow(16)
-            val testValue = Value(time = time, value = value)
-            viewModel.insert(testValue)
-        }
     }
 
     @SuppressLint("SetTextI18n")
