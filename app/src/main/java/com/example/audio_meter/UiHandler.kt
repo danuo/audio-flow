@@ -1,5 +1,6 @@
 package com.example.audio_meter
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.view.View
 import android.widget.Button
@@ -14,6 +15,7 @@ const val N_LEDS = 10
 const val N_LEDS_ORANGE = N_LEDS - 1
 const val N_LEDS_GREEN = N_LEDS_ORANGE / 2
 
+@SuppressLint("SetTextI18n")
 class UiHandler(
     private val context: MainActivity,
 ) {
@@ -35,7 +37,7 @@ class UiHandler(
             context.audioRecorder.toggleRecording()
             if (context.audioRecorder.isRecording) {
                 startRecordButton.text = "Stop Recording"
-                context.readAudioData()
+                context.audioRecorder.readAudioData()
             } else {
                 startRecordButton.text = "Start Recording"
             }
