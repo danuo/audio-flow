@@ -10,7 +10,7 @@ class DataHandler(
     private val amplitudeTextView: TextView,
     private val audioMeterLayout: LinearLayout
 ) {
-    private val nGroup: Int = 50
+    private val nGroup: Int = 30  // every 3 seconds
     private var counter: Int = 0
     private var valSum: Float = 0f
 
