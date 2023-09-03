@@ -10,9 +10,8 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.Room
-import android.content.Context
-import android.widget.TextView
 import androidx.annotation.WorkerThread
+import android.content.Context
 import kotlin.random.Random
 import kotlinx.coroutines.flow.Flow
 import androidx.lifecycle.LiveData
@@ -22,7 +21,6 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import androidx.activity.ComponentActivity
-import com.github.mikephil.charting.charts.LineChart
 
 
 @Entity(tableName = "data_table")
@@ -31,8 +29,8 @@ class Value(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val time: Long,
     val value: Float
-
 )
+
 
 @Dao
 interface ValueDao {
@@ -47,6 +45,7 @@ interface ValueDao {
     suspend fun deleteAll()
 }
 
+
 // Annotates class to be a Room Database with a table (entity) of the Word class
 @Database(entities = [Value::class], version = 1, exportSchema = false)
 abstract class ValueDatabase : RoomDatabase() {
@@ -54,14 +53,12 @@ abstract class ValueDatabase : RoomDatabase() {
     abstract fun valueDao(): ValueDao
 
     companion object {
-        // Singleton prevents multiple instances of database opening at the
-        // same time.
+        // Singleton prevents multiple instances of database opening at the same time.
         @Volatile
         private var INSTANCE: ValueDatabase? = null
 
         fun getDatabase(context: Context): ValueDatabase {
-            // if the INSTANCE is not null, then return it,
-            // if it is, then create the database
+            // if the INSTANCE is not null, then return it, else create the database
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
@@ -69,32 +66,21 @@ abstract class ValueDatabase : RoomDatabase() {
                     "value_database"
                 ).build()
                 INSTANCE = instance
-                // return instance
-                instance
+                return instance
             }
         }
     }
 }
 
 
-// Declares the DAO as a private property in the constructor. Pass in the DAO
-// instead of the whole database, because you only need access to the DAO
 class ValueRepository(private val valueDao: ValueDao) {
-
-    // Room executes all queries on a separate thread.
-    // Observed Flow will notify the observer when the data has changed.
     val allValues: Flow<List<Value>> = valueDao.getValues()
 
-    // By default Room runs suspend queries off the main thread, therefore, we don't need to
-    // implement anything else to ensure we're not doing long running database work
-    // off the main thread.
-    // @Suppress("RedundantSuspendModifier")
     @WorkerThread
     suspend fun insert(value: Value) {
         valueDao.insert(value)
     }
 
-    // @Suppress("RedundantSuspendModifier")
     @WorkerThread
     suspend fun deleteAll() {
         valueDao.deleteAll()
@@ -122,13 +108,9 @@ class ValueViewModel(private val repository: ValueRepository) : ViewModel() {
 }
 
 
-class WordViewModelFactory(private val repository: ValueRepository) : ViewModelProvider.Factory {
+class ValueViewModelFactory(private val repository: ValueRepository) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(ValueViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return ValueViewModel(repository) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
+        return ValueViewModel(repository) as T
     }
 }
 
@@ -139,8 +121,8 @@ class DatabaseHandler(
 ) {
     private val database = ValueDatabase.getDatabase(context)
     private val repository = ValueRepository(database.valueDao())
-    private val viewModel = ValueViewModel(repository)
-    // private val viewModel = ViewModelProvider(context)[ValueViewModel::class.java]
+    private val factory = ValueViewModelFactory(repository)
+    private val viewModel = ViewModelProvider(context, factory).get(ValueViewModel::class.java)
 
     var newestData = listOf<Value>()
 
@@ -152,7 +134,6 @@ class DatabaseHandler(
                 uiHandler.updateUI(mapOf("nSamples" to data.size))
             }
         }
-        // Log.d("DatabaseHandler", x.toString())
         addText("some text")
     }
 
