@@ -11,9 +11,7 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import java.text.DateFormat
 import java.util.Date
-import java.util.Locale
 import java.text.SimpleDateFormat
 
 
@@ -143,10 +141,11 @@ class UiHandler(
 
 
 class LineChartXAxisValueFormatter : IndexAxisValueFormatter() {
+    @SuppressLint("SimpleDateFormat")
     override fun getFormattedValue(value: Float): String {
         val emissionsMilliSince1970Time = value.toLong() + SHIFT
         val timeMilliseconds = Date(emissionsMilliSince1970Time)
-        val dateFormat = SimpleDateFormat("HH:mm");
+        val dateFormat = SimpleDateFormat("HH:mm")
         return dateFormat.format(timeMilliseconds)
     }
 }
