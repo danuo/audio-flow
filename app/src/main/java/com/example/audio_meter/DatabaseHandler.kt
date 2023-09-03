@@ -1,6 +1,5 @@
 package com.example.audio_meter
 
-import android.annotation.SuppressLint
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.Dao
@@ -108,6 +107,7 @@ class ValueViewModel(private val repository: ValueRepository) : ViewModel() {
 }
 
 
+@Suppress("UNCHECKED_CAST")
 class ValueViewModelFactory(private val repository: ValueRepository) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return ValueViewModel(repository) as T

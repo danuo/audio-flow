@@ -23,17 +23,22 @@ class AudioRecorder(
     init {
         checkRecordPermission()
         val minBufferSize = AudioRecord.getMinBufferSize(
-            MainActivity.SAMPLE_RATE,
+            SAMPLE_RATE,
             AudioFormat.CHANNEL_IN_MONO,
             AudioFormat.ENCODING_PCM_16BIT
         )
         audioRecord = AudioRecord(
             MediaRecorder.AudioSource.MIC,
-            MainActivity.SAMPLE_RATE,
+            SAMPLE_RATE,
             AudioFormat.CHANNEL_IN_MONO,
             AudioFormat.ENCODING_PCM_16BIT,
             minBufferSize
         )
+    }
+
+    companion object {
+        const val SAMPLE_RATE = 44100
+        const val BUFFER_SIZE = (SAMPLE_RATE / MainActivity.REFRESH_RATE)  // before: 1024
     }
 
     fun toggleRecording() {
@@ -48,9 +53,9 @@ class AudioRecorder(
 
     fun readAudioData() {
         Thread {
-            val audioBuffer = ShortArray(MainActivity.BUFFER_SIZE)
+            val audioBuffer = ShortArray(BUFFER_SIZE)
             while (this.isRecording) {
-                audioRecord.read(audioBuffer, 0, MainActivity.BUFFER_SIZE)
+                audioRecord.read(audioBuffer, 0, BUFFER_SIZE)
                 val maxAmplitude = calculateMaxAmplitude(audioBuffer)
                 processAmplitude(maxAmplitude)
             }

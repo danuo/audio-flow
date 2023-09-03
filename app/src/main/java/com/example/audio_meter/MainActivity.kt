@@ -25,9 +25,7 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
-        private const val REFRESH_RATE = 10
-        const val SAMPLE_RATE = 44100
-        const val BUFFER_SIZE = (SAMPLE_RATE / REFRESH_RATE)  // before: 1024
+        const val REFRESH_RATE = 10
     }
 
     private fun startServer(context: ComponentActivity, databaseHandler: DatabaseHandler) {

@@ -7,8 +7,6 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import android.content.Context
 
 class Server(contextRoot: Context, private val databaseHandler: DatabaseHandler) {
