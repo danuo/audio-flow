@@ -1,5 +1,6 @@
 package com.example.audio_meter
 
+import android.annotation.SuppressLint
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.Dao
@@ -87,13 +88,13 @@ class ValueRepository(private val valueDao: ValueDao) {
     // By default Room runs suspend queries off the main thread, therefore, we don't need to
     // implement anything else to ensure we're not doing long running database work
     // off the main thread.
-    @Suppress("RedundantSuspendModifier")
+    // @Suppress("RedundantSuspendModifier")
     @WorkerThread
     suspend fun insert(value: Value) {
         valueDao.insert(value)
     }
 
-    @Suppress("RedundantSuspendModifier")
+    // @Suppress("RedundantSuspendModifier")
     @WorkerThread
     suspend fun deleteAll() {
         valueDao.deleteAll()
@@ -180,6 +181,7 @@ class DatabaseHandler(context: ComponentActivity, private val textView: TextView
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun addText(text: String) {
         textView.text = textView.text.toString() + text
     }

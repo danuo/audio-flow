@@ -1,6 +1,7 @@
 package com.example.audio_meter
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.media.AudioFormat
@@ -30,8 +31,12 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var audioRecorder: AudioRecorder
     private lateinit var databaseHandler: DatabaseHandler
-    private lateinit var dataHandler: DataHandler
+    private lateinit var uiHandler: UiHandler
     val handler = Handler(Looper.getMainLooper())
+
+    private val nGroup: Int = 30  // every 3 seconds
+    private var counter: Int = 0
+    private var valSum: Float = 0f
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,16 +46,31 @@ class MainActivity : ComponentActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             initServer(databaseHandler)
         }
-        dataHandler = DataHandler(this, databaseHandler, amplitudeTextView, audioMeterLayout)
     }
 
     companion object {
         const val NLEDS = 10
-        const val NLEDS_ORANGE = NLEDS - 1
+        private const val NLEDS_ORANGE = NLEDS - 1
         const val NLEDS_GREEN = NLEDS_ORANGE / 2
         private const val REFRESH_RATE = 10
         private const val SAMPLE_RATE = 44100
         private const val BUFFER_SIZE = (SAMPLE_RATE / REFRESH_RATE)  // before: 1024
+    }
+
+    private fun processAmplitude(amplitude: Int) {
+        uiHandler.updateUI(amplitude)
+        addToMean(amplitude)
+    }
+
+    private fun addToMean(amplitude: Int) {
+        valSum += amplitude
+        counter += 1
+        if (counter == nGroup) {
+            val avg = valSum / nGroup
+            databaseHandler.insertData(avg)
+            counter = 0
+            valSum = 0f
+        }
     }
 
     private fun initServer(databaseHandler: DatabaseHandler) {
@@ -75,6 +95,7 @@ class MainActivity : ComponentActivity() {
         audioRecorder = AudioRecorder(audioRecord)
     }
 
+    @SuppressLint("SetTextI18n")
     private fun initUI() {
         setContentView(R.layout.activity_main)
         amplitudeTextView = findViewById<TextView>(R.id.amplitudeText)
@@ -94,6 +115,7 @@ class MainActivity : ComponentActivity() {
                 startRecordButton.text = "Start Recording"
             }
         }
+        uiHandler = UiHandler(this, amplitudeTextView, audioMeterLayout)
     }
 
     private fun showConfirmationDialog() {
@@ -124,7 +146,7 @@ class MainActivity : ComponentActivity() {
             while (audioRecorder.isRecording) {
                 audioRecorder.audioRecord.read(audioBuffer, 0, BUFFER_SIZE)
                 val maxAmplitude = calculateMaxAmplitude(audioBuffer)
-                dataHandler.updateUI(maxAmplitude)
+                processAmplitude(maxAmplitude)
             }
         }.start()
     }
