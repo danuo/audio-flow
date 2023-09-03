@@ -122,7 +122,8 @@ class DatabaseHandler(
     private val database = ValueDatabase.getDatabase(context)
     private val repository = ValueRepository(database.valueDao())
     private val factory = ValueViewModelFactory(repository)
-    private val viewModel = ViewModelProvider(context, factory).get(ValueViewModel::class.java)
+    private val viewModel =
+        ViewModelProvider(context, factory).get(modelClass = ValueViewModel::class.java)
 
     var newestData = listOf<Value>()
 
