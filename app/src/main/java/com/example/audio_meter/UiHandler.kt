@@ -3,12 +3,10 @@ package com.example.audio_meter
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.res.Resources
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.view.size
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
@@ -16,9 +14,12 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import java.util.Date
 import java.text.SimpleDateFormat
+import android.graphics.Color
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
 
 
-const val N_LEDS = 16
+const val N_LEDS = 28
 const val N_LEDS_ORANGE = N_LEDS - 1
 const val N_LEDS_GREEN = N_LEDS_ORANGE / 2
 const val SHIFT = 1693777500000L
@@ -35,7 +36,7 @@ class UiHandler(
     private var nSamples: Int = 0
 
     init {
-        initVolmeter()
+        initVolumeMeter()
         initChart()
         val deleteButton = context.findViewById<Button>(R.id.deleteButton)
         deleteButton.setOnClickListener {
@@ -67,7 +68,7 @@ class UiHandler(
         lineChart.invalidate()
     }
 
-    private fun initVolmeter() {
+    private fun initVolumeMeter() {
         val audioMeterLayout = context.findViewById<LinearLayout>(R.id.audioMeterLayout)
 
         val width = (Resources.getSystem().displayMetrics.density * 50).toInt()
@@ -112,11 +113,21 @@ class UiHandler(
         for (index in 0 until N_LEDS) {
             val led = audioMeterLayout.getChildAt(N_LEDS - 1 - index) as View
             if (index < thresh) {
-                led.setBackgroundColor(getColorForAudioLevelOn(amplitude))
+                // led.setBackgroundColor(getColorForAudioLevelOn(amplitude))
+                led.background = getDrawable(getColorForAudioLevelOn(amplitude))
             } else {
-                led.setBackgroundColor(getColorForAudioLevelOff(amplitude))
+                // led.setBackgroundColor(getColorForAudioLevelOff(amplitude))
+                led.background = getDrawable(getColorForAudioLevelOff(amplitude))
             }
         }
+    }
+
+    private fun getDrawable(color: Int): Drawable {
+        val drawable = GradientDrawable()
+        drawable.shape = GradientDrawable.RECTANGLE
+        drawable.setColor(color)
+        drawable.setStroke(4, Color.BLACK)
+        return drawable
     }
 
     private fun showConfirmationDialog() {
