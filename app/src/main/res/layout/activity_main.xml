@@ -2,15 +2,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/startButton"
+    <LinearLayout
+        android:id="@+id/buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Start Recording" />
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/deleteButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Delete Data" />
+
+        <Button
+            android:id="@+id/startButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Start Recording" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/amplitudeText"
-        android:layout_below="@id/startButton"
+        android:layout_below="@id/buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Amplitude: 0"

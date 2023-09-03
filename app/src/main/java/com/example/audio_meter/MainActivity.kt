@@ -1,6 +1,8 @@
 package com.example.audio_meter
 
 import android.Manifest
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
@@ -8,16 +10,16 @@ import android.media.MediaRecorder
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.widget.TextView
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 
 class MainActivity : ComponentActivity() {
@@ -79,23 +81,44 @@ class MainActivity : ComponentActivity() {
         amplitudeTextView = findViewById<TextView>(R.id.amplitudeText)
         tempTextView = findViewById<TextView>(R.id.tempText)
         audioMeterLayout = findViewById<LinearLayout>(R.id.audioMeterLayout)
-        val startButton = findViewById<Button>(R.id.startButton)
-        startButton.setOnClickListener {
+        val deleteButton = findViewById<Button>(R.id.deleteButton)
+        deleteButton.setOnClickListener {
+            showConfirmationDialog()
+        }
+        val startRecordButton = findViewById<Button>(R.id.startButton)
+        startRecordButton.setOnClickListener {
             audioRecorder.toggleRecording()
             if (audioRecorder.isRecording) {
-                startButton.text = "Stop Recording"
-                updateVoiceLevel()
+                startRecordButton.text = "Stop Recording"
+                getAmplitude()
             } else {
-                startButton.text = "Start Recording"
+                startRecordButton.text = "Start Recording"
             }
         }
+    }
+
+    private fun showConfirmationDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setMessage("Do you want to delete all data?")
+            .setCancelable(false)
+            .setPositiveButton("Yes", DialogInterface.OnClickListener { dialog, _ ->
+                dialog.dismiss()
+                databaseHandler.deleteAll()
+            }
+            )
+            .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, _ ->
+                dialog.cancel()
+            })
+        val alert = builder.create();
+        alert.setTitle("AlertDialogExample");
+        alert.show();
     }
 
     private fun initDB(): DatabaseHandler {
         return DatabaseHandler(context = this, textView = tempTextView)
     }
 
-    private fun updateVoiceLevel() {
+    private fun getAmplitude() {
         Thread {
             val audioBuffer = ShortArray(BUFFER_SIZE)
             while (audioRecorder.isRecording) {

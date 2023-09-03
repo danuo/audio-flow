@@ -92,6 +92,12 @@ class ValueRepository(private val valueDao: ValueDao) {
     suspend fun insert(value: Value) {
         valueDao.insert(value)
     }
+
+    @Suppress("RedundantSuspendModifier")
+    @WorkerThread
+    suspend fun deleteAll() {
+        valueDao.deleteAll()
+    }
 }
 
 
@@ -103,11 +109,14 @@ class ValueViewModel(private val repository: ValueRepository) : ViewModel() {
     // - Repository is completely separated from the UI through the ViewModel.
     val allValues: LiveData<List<Value>> = repository.allValues.asLiveData()
 
-    /**
-     * Launching a new coroutine to insert the data in a non-blocking way
-     */
+
+    // launching a new coroutine to insert the data in a non-blocking way
     fun insert(value: Value) = viewModelScope.launch {
         repository.insert(value)
+    }
+
+    fun deleteAll() = viewModelScope.launch {
+        repository.deleteAll()
     }
 }
 
@@ -126,7 +135,6 @@ class WordViewModelFactory(private val repository: ValueRepository) : ViewModelP
 class DatabaseHandler(context: ComponentActivity, private val textView: TextView) {
     private val database = ValueDatabase.getDatabase(context)
     private val repository = ValueRepository(database.valueDao())
-
     private val viewModel = ValueViewModel(repository)
     // private val viewModel = ViewModelProvider(context)[ValueViewModel::class.java]
 
@@ -154,6 +162,11 @@ class DatabaseHandler(context: ComponentActivity, private val textView: TextView
     fun insertData(value: Float) {
         val time: Long = System.currentTimeMillis() + Random.nextInt(-10000, 10000)
         viewModel.insert(Value(time = time, value = value))
+    }
+
+    fun deleteAll() {
+        newestData = listOf<Value>()
+        viewModel.deleteAll()
     }
 
     private fun generateRandomData() {
