@@ -146,13 +146,15 @@ class DatabaseHandler(context: ComponentActivity, private val textView: TextView
         addText("randomstuff")
         viewModel.allValues.observe(context) { data ->
             newestData = data
-            addText(data[0].value.toString())
-            addText("size")
-            addText(data.size.toString())
-            //for (dat in data) {
-            //    addText((dat.value.toString()))
-            //}
-            addText("added something")
+            if (data.isNotEmpty()) {
+                addText(data[0].value.toString())
+                addText("size")
+                addText(data.size.toString())
+                //for (dat in data) {
+                //    addText((dat.value.toString()))
+                //}
+                addText("added something")
+            }
         }
         // Log.d("DatabaseHandler", x.toString())
         generateRandomData()
