@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>State Display</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/moment@^2"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@^1"></script>
+    </head>
+    <body>
+        <h1>Temperature Over the Last 100 Minutes</h1>
+        <div style="width: 100%;">
+            <canvas id="temperatureChart"></canvas>
+        </div>
+        <script>
+                async function fetchTemperatureData() {
+                    try {
+                        const response = await fetch('/data');
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch data');
+                        }
+                        return await response.json();
+                    } catch (error) {
+                        console.error('Error fetching data:', error);
+                        return { time: [], values: [] };
+                    }
+                }
+
+                async function updateChart(chart) {
+                    const data = await fetchTemperatureData();
+
+                    // Update the chart with the fetched data
+                    chart.data.labels = data.time;
+                    chart.data.datasets[0].data = data.values;
+                    chart.update();
+                }
+
+                var ctx = document.getElementById('temperatureChart');
+
+                var chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Temperature (°C)',
+                            data: [],
+                            borderColor: 'blue',
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'minute'
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Time'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Temperature (°C)'
+                                }
+                            }
+                        }
+                    }
+                });
+                updateChart(chart);
+
+                // Auto-refresh the chart every 60 seconds (or as needed)
+                setInterval(function() {
+                    updateChart(chart);
+                }, 1000 * 5); // every 5 sek
+
+
+
+        </script>
+    </body>
+</html>

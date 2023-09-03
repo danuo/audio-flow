@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun initServer(databaseHandler: DatabaseHandler) {
-        val server = Server(databaseHandler)
+        val server = Server(this, databaseHandler)
         server.startServer()
     }
 
@@ -116,7 +116,6 @@ class MainActivity : ComponentActivity() {
         }
         return max
     }
-
 
     private fun checkRecordPermission() {
         val permission = Manifest.permission.RECORD_AUDIO
