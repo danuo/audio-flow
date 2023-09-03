@@ -44,71 +44,9 @@
 
         <LinearLayout
             android:id="@+id/audioMeterLayout"
-            android:layout_width="wrap_content"
+            android:layout_width="50dp"
             android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <View
-                android:layout_width="50dp"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="#CCCCCC" />
-
-            <View
-                android:layout_width="50dp"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="#CCCCCC" />
-
-            <View
-                android:layout_width="50dp"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="#CCCCCC" />
-
-            <View
-                android:layout_width="50dp"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="#CCCCCC" />
-
-            <View
-                android:layout_width="50dp"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="#CCCCCC" />
-
-            <View
-                android:layout_width="50dp"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="#CCCCCC" />
-
-            <View
-                android:layout_width="50dp"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="#CCCCCC" />
-
-            <View
-                android:layout_width="50dp"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="#CCCCCC" />
-
-            <View
-                android:layout_width="50dp"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="#CCCCCC" />
-
-            <View
-                android:layout_width="50dp"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="#CCCCCC" />
-        </LinearLayout>
-
+            android:orientation="vertical"></LinearLayout>
 
         <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/lineChart"

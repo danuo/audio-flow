@@ -2,10 +2,13 @@ package com.example.audio_meter
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.res.Resources
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.view.size
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
@@ -15,7 +18,7 @@ import java.util.Date
 import java.text.SimpleDateFormat
 
 
-const val N_LEDS = 10
+const val N_LEDS = 16
 const val N_LEDS_ORANGE = N_LEDS - 1
 const val N_LEDS_GREEN = N_LEDS_ORANGE / 2
 const val SHIFT = 1693777500000L
@@ -32,6 +35,7 @@ class UiHandler(
     private var nSamples: Int = 0
 
     init {
+        initVolmeter()
         initChart()
         val deleteButton = context.findViewById<Button>(R.id.deleteButton)
         deleteButton.setOnClickListener {
@@ -56,11 +60,27 @@ class UiHandler(
     fun updateChart(data: List<Value>) {
         val dataSet =
             LineDataSet(data.map { Entry((it.time - SHIFT).toFloat(), it.value) }, "Temperature")
-        dataSet.color = (0xFFFF0000).toInt()
-        dataSet.setCircleColor((0xFFFF0000).toInt())
+        dataSet.color = 0xFFFF0000.toInt()
+        dataSet.setCircleColor(0xFFFF0000.toInt())
         val lineData = LineData(dataSet)
         lineChart.data = lineData
         lineChart.invalidate()
+    }
+
+    private fun initVolmeter() {
+        val audioMeterLayout = context.findViewById<LinearLayout>(R.id.audioMeterLayout)
+
+        val width = (Resources.getSystem().displayMetrics.density * 50).toInt()
+
+        val layoutParams = LinearLayout.LayoutParams(width, 0)
+        layoutParams.weight = 1f
+
+        for (i in 0 until N_LEDS) {
+            val view = View(context)
+            view.layoutParams = layoutParams
+            view.setBackgroundColor((0xFF000000).toInt())
+            audioMeterLayout.addView(view)
+        }
     }
 
     fun updateUI(data: Map<String, Int>) {
@@ -90,7 +110,7 @@ class UiHandler(
 
         val thresh: Int = amplitude / 1000
         for (index in 0 until N_LEDS) {
-            val led = audioMeterLayout.getChildAt(index) as View
+            val led = audioMeterLayout.getChildAt(N_LEDS - 1 - index) as View
             if (index < thresh) {
                 led.setBackgroundColor(getColorForAudioLevelOn(amplitude))
             } else {
