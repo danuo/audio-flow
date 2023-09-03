@@ -136,7 +136,6 @@ class WordViewModelFactory(private val repository: ValueRepository) : ViewModelP
 class DatabaseHandler(
     context: ComponentActivity,
     private val uiHandler: UiHandler,
-    private val textView: TextView
 ) {
     private val database = ValueDatabase.getDatabase(context)
     private val repository = ValueRepository(database.valueDao())
@@ -169,6 +168,6 @@ class DatabaseHandler(
 
     @SuppressLint("SetTextI18n")
     private fun addText(text: String) {
-        textView.text = textView.text.toString() + text
+        uiHandler.tempTextView.text = uiHandler.tempTextView.text.toString() + text
     }
 }
