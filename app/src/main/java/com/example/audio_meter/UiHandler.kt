@@ -10,10 +10,17 @@ import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import java.text.DateFormat
+import java.util.Date
+import java.util.Locale
+import java.text.SimpleDateFormat
+
 
 const val N_LEDS = 10
 const val N_LEDS_ORANGE = N_LEDS - 1
 const val N_LEDS_GREEN = N_LEDS_ORANGE / 2
+const val SHIFT = 1693777500000L
 
 @SuppressLint("SetTextI18n")
 class UiHandler(
@@ -28,6 +35,7 @@ class UiHandler(
     private var nSamples: Int = 0
 
     init {
+        initChart()
         val deleteButton = context.findViewById<Button>(R.id.deleteButton)
         deleteButton.setOnClickListener {
             showConfirmationDialog()
@@ -44,9 +52,13 @@ class UiHandler(
         }
     }
 
+    private fun initChart() {
+        lineChart.xAxis.valueFormatter = LineChartXAxisValueFormatter()
+    }
+
     fun updateChart(data: List<Value>) {
         val dataSet =
-            LineDataSet(data.map { Entry(it.time.toFloat(), it.value) }, "Temperature")
+            LineDataSet(data.map { Entry((it.time - SHIFT).toFloat(), it.value) }, "Temperature")
         dataSet.color = (0xFFFF0000).toInt()
         dataSet.setCircleColor((0xFFFF0000).toInt())
         val lineData = LineData(dataSet)
@@ -126,5 +138,15 @@ class UiHandler(
         } else {
             0xFF002000.toInt() // green
         }
+    }
+}
+
+
+class LineChartXAxisValueFormatter : IndexAxisValueFormatter() {
+    override fun getFormattedValue(value: Float): String {
+        val emissionsMilliSince1970Time = value.toLong() + SHIFT
+        val timeMilliseconds = Date(emissionsMilliSince1970Time)
+        val dateFormat = SimpleDateFormat("HH:mm");
+        return dateFormat.format(timeMilliseconds)
     }
 }
