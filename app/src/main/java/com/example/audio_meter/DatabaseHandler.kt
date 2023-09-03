@@ -22,6 +22,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import androidx.activity.ComponentActivity
+import com.github.mikephil.charting.charts.LineChart
 
 
 @Entity(tableName = "data_table")
@@ -148,6 +149,7 @@ class DatabaseHandler(
         viewModel.allValues.observe(context) { data ->
             newestData = data
             if (data.isNotEmpty()) {
+                uiHandler.updateChart(data)
                 uiHandler.updateUI(mapOf("nSamples" to data.size))
             }
         }

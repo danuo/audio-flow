@@ -20,12 +20,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.abs
+import com.github.mikephil.charting.charts.LineChart
 
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var amplitudeTextView: TextView
     private lateinit var tempTextView: TextView
+    private lateinit var lineChart: LineChart
     private lateinit var audioMeterLayout: LinearLayout
     private lateinit var audioRecorder: AudioRecorder
     private lateinit var databaseHandler: DatabaseHandler
@@ -95,6 +97,7 @@ class MainActivity : ComponentActivity() {
         amplitudeTextView = findViewById<TextView>(R.id.amplitudeText)
         tempTextView = findViewById<TextView>(R.id.tempText)
         audioMeterLayout = findViewById<LinearLayout>(R.id.audioMeterLayout)
+        lineChart = findViewById<LineChart>(R.id.lineChart)
         val deleteButton = findViewById<Button>(R.id.deleteButton)
         deleteButton.setOnClickListener {
             showConfirmationDialog()
@@ -109,7 +112,7 @@ class MainActivity : ComponentActivity() {
                 startRecordButton.text = "Start Recording"
             }
         }
-        uiHandler = UiHandler(this, amplitudeTextView, audioMeterLayout)
+        uiHandler = UiHandler(this, lineChart, amplitudeTextView, audioMeterLayout)
     }
 
     private fun showConfirmationDialog() {
