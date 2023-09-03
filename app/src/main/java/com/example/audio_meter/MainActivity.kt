@@ -2,7 +2,6 @@ package com.example.audio_meter
 
 import android.Manifest
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
@@ -51,7 +50,7 @@ class MainActivity : ComponentActivity() {
         const val NLEDS_GREEN = NLEDS_ORANGE / 2
         private const val REFRESH_RATE = 10
         private const val SAMPLE_RATE = 44100
-        private const val BUFFER_SIZE = (SAMPLE_RATE / REFRESH_RATE).toInt()  // before: 1024
+        private const val BUFFER_SIZE = (SAMPLE_RATE / REFRESH_RATE)  // before: 1024
     }
 
     private fun initServer(databaseHandler: DatabaseHandler) {
@@ -101,17 +100,18 @@ class MainActivity : ComponentActivity() {
         val builder = AlertDialog.Builder(this)
         builder.setMessage("Do you want to delete all data?")
             .setCancelable(false)
-            .setPositiveButton("Yes", DialogInterface.OnClickListener { dialog, _ ->
+            .setPositiveButton(
+                "Yes"
+            ) { dialog, _ ->
                 dialog.dismiss()
                 databaseHandler.deleteAll()
             }
-            )
-            .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, _ ->
+            .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.cancel()
-            })
-        val alert = builder.create();
-        alert.setTitle("AlertDialogExample");
-        alert.show();
+            }
+        val alert = builder.create()
+        alert.setTitle("AlertDialogExample")
+        alert.show()
     }
 
     private fun initDB(): DatabaseHandler {

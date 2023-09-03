@@ -165,7 +165,7 @@ class DatabaseHandler(context: ComponentActivity, private val textView: TextView
     }
 
     fun deleteAll() {
-        newestData = listOf<Value>()
+        newestData = listOf()
         viewModel.deleteAll()
     }
 

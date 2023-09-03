@@ -37,10 +37,10 @@ class DataHandler(
         valSum += amplitude
         counter += 1
         if (counter == nGroup) {
-            var avg = valSum / nGroup
+            val avg = valSum / nGroup
+            databaseHandler.insertData(avg)
             counter = 0
             valSum = 0f
-            databaseHandler.insertData(avg)
         }
     }
 
