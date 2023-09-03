@@ -21,8 +21,7 @@ class Server(contextRoot: Context, private val databaseHandler: DatabaseHandler)
         startServer()
     }
 
-    fun startServer() {
-        println("Starting CustomServer")
+    private fun startServer() {
         embeddedServer(Netty, port = 4444) {
             extracted()
         }.start(wait = true)

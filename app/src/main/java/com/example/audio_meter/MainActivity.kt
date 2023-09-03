@@ -20,10 +20,8 @@ class MainActivity : ComponentActivity() {
         audioRecorder = AudioRecorder(this)
         setContentView(R.layout.activity_main)
         uiHandler = UiHandler(this)
-        initDB(uiHandler)
-        CoroutineScope(Dispatchers.IO).launch {
-            initServer(databaseHandler)
-        }
+        databaseHandler = DatabaseHandler(context = this, uiHandler = uiHandler)
+        startServer(this, databaseHandler)
     }
 
     companion object {
@@ -32,13 +30,9 @@ class MainActivity : ComponentActivity() {
         const val BUFFER_SIZE = (SAMPLE_RATE / REFRESH_RATE)  // before: 1024
     }
 
-    private fun initDB(uiHandler: UiHandler) {
-        databaseHandler =
-            DatabaseHandler(context = this, uiHandler = uiHandler)
-    }
-
-    private fun initServer(databaseHandler: DatabaseHandler) {
-        val server = Server(this, databaseHandler)
-        server.startServer()
+    private fun startServer(context: ComponentActivity, databaseHandler: DatabaseHandler) {
+        CoroutineScope(Dispatchers.IO).launch {
+            Server(context, databaseHandler)
+        }
     }
 }
