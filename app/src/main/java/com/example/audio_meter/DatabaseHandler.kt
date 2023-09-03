@@ -135,7 +135,6 @@ class DatabaseHandler(
                 uiHandler.updateUI(mapOf("nSamples" to data.size))
             }
         }
-        addText("some text")
     }
 
     fun insertData(value: Float) {
@@ -146,10 +145,5 @@ class DatabaseHandler(
     fun deleteAll() {
         newestData = listOf()
         viewModel.deleteAll()
-    }
-
-    @SuppressLint("SetTextI18n")
-    private fun addText(text: String) {
-        uiHandler.tempTextView.text = uiHandler.tempTextView.text.toString() + text
     }
 }

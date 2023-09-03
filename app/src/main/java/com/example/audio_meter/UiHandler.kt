@@ -28,7 +28,6 @@ class UiHandler(
     private val amplitudeTextView: TextView = context.findViewById(R.id.amplitudeText)
     private val lineChart: LineChart = context.findViewById(R.id.lineChart)
     private val audioMeterLayout: LinearLayout = context.findViewById((R.id.audioMeterLayout))
-    val tempTextView: TextView = context.findViewById(R.id.tempText)
     private var amplitude: Int = 10
     private var nSamples: Int = 0
 
