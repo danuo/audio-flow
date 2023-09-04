@@ -35,9 +35,19 @@ class UiHandler(
     private var amplitude: Int = 10
     private var nSamples: Int = 0
 
+    private val extraOptionsLayout: LinearLayout
+    private var extraOptionsVisible = true
+
     init {
         initVolumeMeter()
         initChart()
+        extraOptionsLayout = context.findViewById(R.id.extraOptions)
+        applyVisibility()
+        val toggleButton: Button = context.findViewById(R.id.toggleButton)
+        toggleButton.setOnClickListener {
+            extraOptionsVisible = !extraOptionsVisible
+            applyVisibility()
+        }
         val deleteButton = context.findViewById<Button>(R.id.deleteButton)
         deleteButton.setOnClickListener {
             showConfirmationDialog()
@@ -54,6 +64,14 @@ class UiHandler(
         }
     }
 
+    private fun applyVisibility() {
+        if (extraOptionsVisible) {
+            extraOptionsLayout.visibility = View.VISIBLE
+        } else {
+            extraOptionsLayout.visibility = View.GONE
+        }
+    }
+
     private fun initChart() {
         chart.xAxis.valueFormatter = LineChartXAxisValueFormatter()
     }
@@ -67,25 +85,25 @@ class UiHandler(
         val lineData = LineData(dataSet)
         chart.data = lineData
 
-        chart.isScaleXEnabled = true;
-        chart.isScaleYEnabled = true;
-        chart.setPinchZoom(true);
+        chart.isScaleXEnabled = true
+        chart.isScaleYEnabled = true
+        chart.setPinchZoom(true)
         // disable description text
-        chart.description.isEnabled = false;
+        chart.description.isEnabled = false
 
-        val xAxis = chart.xAxis;
+        val xAxis = chart.xAxis
 
         // vertical grid lines
-        xAxis.enableGridDashedLine(10f, 10f, 0f);
+        xAxis.enableGridDashedLine(10f, 10f, 0f)
 
         // disable dual axis (only use LEFT axis)
-        chart.axisRight.isEnabled = false;
+        chart.axisRight.isEnabled = false
 
         val yAxis = chart.axisLeft
-        // yAxis.axisMaximum = 200f;
-        // yAxis.axisMinimum = -50f;
+        // yAxis.axisMaximum = 200f
+        // yAxis.axisMinimum = -50f
 
-        // darkmode
+        // dark mode
         // https://github.com/PhilJay/MPAndroidChart/issues/5015
         // chart.setBackgroundColor(Color.BLACK)
 

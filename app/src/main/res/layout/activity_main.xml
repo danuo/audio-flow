@@ -1,7 +1,8 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/buttons"
@@ -10,34 +11,49 @@
         android:orientation="horizontal">
 
         <Button
+            android:id="@+id/toggleButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:text="men"
+            style="?android:attr/buttonBarButtonStyle" />
+
+        <Button
             android:id="@+id/deleteButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Delete Data" />
+            android:text="Delete Data"
+            tools:ignore="ButtonStyle" />
 
         <Button
             android:id="@+id/startButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Start Recording" />
+            android:text="Start Recording"
+            tools:ignore="ButtonStyle" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/amplitudeText"
-        android:layout_below="@id/buttons"
+    <LinearLayout
+        android:id="@+id/extraOptions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Amplitude: 0"
-        android:textSize="18sp"
-        android:gravity="center"
-        android:padding="20dp"
-        tools:ignore="HardcodedText" />
+        android:orientation="horizontal">
 
+        <TextView
+            android:id="@+id/amplitudeText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Amplitude: 0"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:padding="40dp"
+            tools:ignore="HardcodedText" />
+
+    </LinearLayout>
 
     <LinearLayout
-        android:layout_below="@id/amplitudeText"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:orientation="horizontal">
@@ -54,4 +70,4 @@
             android:layout_weight="1"
             android:layout_height="match_parent" />
     </LinearLayout>
-</RelativeLayout>
+</LinearLayout>
