@@ -101,7 +101,8 @@ class AudioRecorder(
             val valSquareAvg = valSquareSum / nGroup
             val valRMS = sqrt(valSquareAvg).toFloat()
             val valRMSdB = valToDbu(valRMS)
-            context.databaseHandler.insertData(valRMSdB)
+            val time: Long = System.currentTimeMillis()
+            context.databaseHandler.insertData(time, valRMSdB)
             valSquareSum = 0.0
             counter = 0
         }

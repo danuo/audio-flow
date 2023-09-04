@@ -137,8 +137,7 @@ class DatabaseHandler(
         }
     }
 
-    fun insertData(value: Float) {
-        val time: Long = System.currentTimeMillis() + Random.nextInt(-10000, 10000)
+    fun insertData(time: Long, value: Float) {
         viewModel.insert(Value(time = time, value = value))
     }
 

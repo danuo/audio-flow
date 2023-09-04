@@ -13,6 +13,7 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import java.util.Date
+import java.util.Random
 import java.text.SimpleDateFormat
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -20,7 +21,7 @@ import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 
 
-const val N_LEDS = 28
+const val N_LEDS = 32
 const val TIME_SHIFT = 1693777500000L
 
 @SuppressLint("SetTextI18n")
@@ -44,7 +45,7 @@ class UiHandler(
     private var debugLayoutVisible = true
 
     init {
-        dbThresholds = getDbThresholds(startValue = 20, step = -2, nValues = N_LEDS)
+        dbThresholds = getDbThresholds(startValue = 20, step = -1, nValues = N_LEDS)
         drawables = generateDrawables()
         initLeds()
         initChart()
@@ -61,9 +62,13 @@ class UiHandler(
             debugLayoutVisible = !debugLayoutVisible
             applyVisibility()
         }
-        val deleteButton = context.findViewById<Button>(R.id.deleteDataButton)
-        deleteButton.setOnClickListener {
+        val deleteDataButton = context.findViewById<Button>(R.id.deleteDataButton)
+        deleteDataButton.setOnClickListener {
             showConfirmationDialog()
+        }
+        val generateDataButton = context.findViewById<Button>(R.id.generateDataButton)
+        generateDataButton.setOnClickListener {
+            generateData()
         }
         val startRecordButton = context.findViewById<Button>(R.id.startButton)
         startRecordButton.setOnClickListener {
@@ -108,19 +113,15 @@ class UiHandler(
         val lineData = LineData(dataSet)
         chart.data = lineData
 
-        chart.isScaleXEnabled = true
-        chart.isScaleYEnabled = true
-        chart.setPinchZoom(true)
-        // disable description text
-        chart.description.isEnabled = false
+        chart.isScaleXEnabled = false
+        chart.isScaleYEnabled = false
+        chart.setPinchZoom(false)
 
         val xAxis = chart.xAxis
-
-        // vertical grid lines
         xAxis.enableGridDashedLine(10f, 10f, 0f)
 
         // disable dual axis (only use LEFT axis)
-        chart.axisRight.isEnabled = false
+        chart.axisRight.setDrawLabels(false)
 
         val yAxis = chart.axisLeft
         yAxis.axisMaximum = dbThresholds.last()
@@ -130,6 +131,7 @@ class UiHandler(
         // https://github.com/PhilJay/MPAndroidChart/issues/5015
         // chart.setBackgroundColor(Color.BLACK)
 
+        chart.description.isEnabled = false
         chart.legend.isEnabled = false
 
         chart.invalidate()
@@ -228,7 +230,7 @@ class UiHandler(
 
 
     private fun getDrawable(amplitude: Float, thresh: Float): Drawable {
-        val redThresh = 14.0f
+        val redThresh = 12.0f
         val orangeThresh = 8.0f
         val ledOn = amplitude > thresh
         val key = if (ledOn) {
@@ -267,6 +269,16 @@ class UiHandler(
         val green = (Color.green(colorInt) * factor).toInt()
         val blue = (Color.blue(colorInt) * factor).toInt()
         return Color.argb(255, red, green, blue)
+    }
+
+    private fun generateData() {
+        val random = Random()
+        repeat(30) {
+            val time =
+                System.currentTimeMillis() - random.nextInt(1000 * 3600 * 10)  // from last 10 hours
+            val value = random.nextFloat() * 25 - 10 - context.dbShift
+            context.databaseHandler.insertData(time, value)
+        }
     }
 }
 
