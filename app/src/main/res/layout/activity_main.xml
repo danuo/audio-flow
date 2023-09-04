@@ -41,6 +41,12 @@
         android:orientation="vertical">
 
         <LinearLayout
+            android:id="@+id/timeSelector"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"></LinearLayout>
+
+        <LinearLayout
             android:id="@+id/dbShiftSelector"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -92,7 +98,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Amplitude: 0"
-            android:textSize="18sp"
+            android:textSize="11sp"
             android:gravity="center"
             android:padding="5dp"
             tools:ignore="HardcodedText" />

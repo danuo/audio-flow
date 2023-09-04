@@ -89,28 +89,43 @@ class UiHandler(
     }
 
     private fun initOptions() {
+        val timeSelector = context.findViewById<LinearLayout>(R.id.timeSelector)
         val dbShiftSelectorLayout = context.findViewById<LinearLayout>(R.id.dbShiftSelector)
         val editText = dbShiftSelectorLayout.getChildAt(0)
-        val values = listOf<Float>(-1f, -0.1f, 0f, 0.1f, 1f)
-        val texts = listOf<String>("-1dB", "-0.1dB", "", "+0.1dB", "+1dB")
+        val valuesTimeButtons =
+            listOf<Long>(6 * 3600 * 1000, 3 * 3600 * 1000, 3600 * 1000, 1800 * 1000, 600 * 1000)
+        val textTimeButtons = listOf<String>("6h", "3h", "1h", "30m", "10m")
+        val valuesDbButtons = listOf<Float>(-1f, -0.1f, 0f, 0.1f, 1f)
+        val textsDbButtons = listOf<String>("-1", "-0.1", "", "+0.1", "+1")
         dbShiftSelectorLayout.removeAllViews()
 
         // button layout
-        val layoutParams = LinearLayout.LayoutParams(0, Button(context).height)
+        val height = Button(context).height
+        val layoutParams = LinearLayout.LayoutParams(0, 20)
         layoutParams.weight = 1f
 
         for (i in 0 until 5) {
+            // time frame
+            val button = Button(context)
+            button.text = textTimeButtons[i]
+            // button.layoutParams = layoutParams
+            button.setOnClickListener {
+                context.showMilliseconds = valuesTimeButtons[i]
+                updateText()
+            }
+            timeSelector.addView(button)
+
+            // dbshift
             if (i == 2) {
                 dbShiftSelectorLayout.addView(editText)
             } else {
                 val button = Button(context)
-                button.text = texts[i]
-                //button.layoutParams = layoutParams
+                button.text = textsDbButtons[i]
+                // button.layoutParams = layoutParams
                 button.setOnClickListener {
-                    context.dbShift += values[i]
+                    context.dbShift += valuesDbButtons[i]
                     updateText()
                 }
-                // context.dbShift = context.dbShift.round(1)
                 dbShiftSelectorLayout.addView(button)
             }
         }
@@ -191,7 +206,8 @@ class UiHandler(
 
     private fun updateText() {
         context.handler.post {
-            val outText = "Amp: $amplitude, AmpdBu: $effectiveAmplitudeDbu, nSamples: $nSamples"
+            val outText =
+                "Amp: $amplitude, AmpdBu: $effectiveAmplitudeDbu, nSamples: $nSamples, ${context.showMilliseconds}"
             amplitudeTextView.text = outText
             dbShiftNum.setText(context.dbShift.round(1).toString())
         }
