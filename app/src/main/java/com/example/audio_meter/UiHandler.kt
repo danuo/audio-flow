@@ -32,26 +32,35 @@ class UiHandler(
     private val chart: LineChart = context.findViewById(R.id.lineChart)
     private val audioMeterLayout: LinearLayout = context.findViewById((R.id.audioMeterLayout))
     private var amplitude: Int = 10
+    private var amplitudeDbu: Int = 10
     private var nSamples: Int = 0
 
     private val drawables: Map<String, List<Drawable>>
     private val dbThresholds: List<Float>
-    private val extraOptionsLayout: LinearLayout
-    private var extraOptionsVisible = true
+    private val optionsLayout: LinearLayout
+    private val debugLayout: LinearLayout
+    private var optionsLayoutVisible = true
+    private var debugLayoutVisible = true
 
     init {
         dbThresholds = getDbThresholds(startValue = 20, step = -2, nValues = N_LEDS)
         drawables = generateDrawables()
         initLeds()
         initChart()
-        extraOptionsLayout = context.findViewById(R.id.extraOptions)
+        debugLayout = context.findViewById(R.id.debugLayout)
+        optionsLayout = context.findViewById(R.id.optionsLayout)
         applyVisibility()
-        val toggleButton: Button = context.findViewById(R.id.toggleButton)
-        toggleButton.setOnClickListener {
-            extraOptionsVisible = !extraOptionsVisible
+        val toggleOptionsButton: Button = context.findViewById(R.id.toggleOptionsButton)
+        toggleOptionsButton.setOnClickListener {
+            optionsLayoutVisible = !optionsLayoutVisible
             applyVisibility()
         }
-        val deleteButton = context.findViewById<Button>(R.id.deleteButton)
+        val toggleDebugButton: Button = context.findViewById(R.id.toggleDebugButton)
+        toggleDebugButton.setOnClickListener {
+            debugLayoutVisible = !debugLayoutVisible
+            applyVisibility()
+        }
+        val deleteButton = context.findViewById<Button>(R.id.deleteDataButton)
         deleteButton.setOnClickListener {
             showConfirmationDialog()
         }
@@ -68,10 +77,15 @@ class UiHandler(
     }
 
     private fun applyVisibility() {
-        if (extraOptionsVisible) {
-            extraOptionsLayout.visibility = View.VISIBLE
+        if (debugLayoutVisible) {
+            debugLayout.visibility = View.VISIBLE
         } else {
-            extraOptionsLayout.visibility = View.GONE
+            debugLayout.visibility = View.GONE
+        }
+        if (optionsLayoutVisible) {
+            optionsLayout.visibility = View.VISIBLE
+        } else {
+            optionsLayout.visibility = View.GONE
         }
     }
 
@@ -120,6 +134,9 @@ class UiHandler(
         if (data.containsKey("amplitude")) {
             amplitude = data["amplitude"]!!
         }
+        if (data.containsKey("amplitudeDbu")) {
+            amplitudeDbu = data["amplitudeDbu"]!!
+        }
         if (data.containsKey("nSamples")) {
             nSamples = data["nSamples"]!!
         }
@@ -130,7 +147,7 @@ class UiHandler(
 
     private fun updateText() {
         context.handler.post {
-            val outText = "Amplitude: $amplitude, nSamples: $nSamples"
+            val outText = "Amp: $amplitude, AmpdBu: $amplitudeDbu, nSamples: $nSamples"
             amplitudeTextView.text = outText
         }
     }
@@ -194,14 +211,11 @@ class UiHandler(
 
     private fun updateLeds() {
         context.handler.post {
-            val outText = "Amplitude: $amplitude, nSamples: $nSamples"
-            amplitudeTextView.text = outText
-        }
-
-        for (index in 0 until N_LEDS) {
-            val thresh = dbThresholds[index]
-            val led = audioMeterLayout.getChildAt(N_LEDS - 1 - index) as View
-            led.background = getDrawable(amplitude.toFloat(), thresh)
+            for (index in 0 until N_LEDS) {
+                val thresh = dbThresholds[index]
+                val led = audioMeterLayout.getChildAt(N_LEDS - 1 - index) as View
+                led.background = getDrawable(amplitude.toFloat(), thresh)
+            }
         }
     }
 

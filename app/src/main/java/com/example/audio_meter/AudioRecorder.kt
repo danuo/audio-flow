@@ -8,6 +8,9 @@ import android.media.MediaRecorder
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlin.math.abs
+import kotlin.math.log10
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 
 class AudioRecorder(
@@ -18,7 +21,7 @@ class AudioRecorder(
 
     private val nGroup: Int = 30  // every 3 seconds
     private var counter: Int = 0
-    private var valSum: Float = 0f
+    private var valSquareSum: Double = 0.0
 
     init {
         checkRecordPermission()
@@ -39,6 +42,13 @@ class AudioRecorder(
     companion object {
         const val SAMPLE_RATE = 44100
         const val BUFFER_SIZE = (SAMPLE_RATE / MainActivity.REFRESH_RATE)  // before: 1024
+    }
+
+    private fun valToDbu(rms: Float): Float {
+        // factor 2 = 6 dB
+        // factor 0.5 = -6 dB
+        // rms of 32000 = 20 dBu
+        return 20 * log10(rms.toDouble()).toFloat() - 70
     }
 
     fun toggleRecording() {
@@ -74,18 +84,26 @@ class AudioRecorder(
     }
 
     private fun processAmplitude(amplitude: Int) {
-        context.uiHandler.updateUI(mapOf("amplitude" to amplitude))
+        val amplitudeDbu = valToDbu(amplitude.toFloat())
+        context.uiHandler.updateUI(
+            mapOf(
+                "amplitude" to amplitude,
+                "amplitudeDbu" to amplitudeDbu.toInt()
+            )
+        )
         poolData(amplitude)
     }
 
     private fun poolData(amplitude: Int) {
-        valSum += amplitude
+        valSquareSum += amplitude.toDouble().pow(2)
         counter += 1
         if (counter == nGroup) {
-            val avg = valSum / nGroup
-            context.databaseHandler.insertData(avg)
+            val valSquareAvg = valSquareSum / nGroup
+            val valRMS = sqrt(valSquareAvg).toFloat()
+            val valRMSdB = valToDbu(valRMS)
+            context.databaseHandler.insertData(valRMSdB)
+            valSquareSum = 0.0
             counter = 0
-            valSum = 0f
         }
     }
 

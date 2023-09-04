@@ -11,20 +11,18 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/toggleButton"
+            android:id="@+id/toggleOptionsButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
-            android:text="men"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:text="Options" />
 
         <Button
-            android:id="@+id/deleteButton"
+            android:id="@+id/toggleDebugButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Delete Data"
-            tools:ignore="ButtonStyle" />
+            android:layout_weight="0.5"
+            android:text="Debug" />
 
         <Button
             android:id="@+id/startButton"
@@ -36,10 +34,47 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/extraOptions"
+        android:id="@+id/optionsLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="test stuff"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:padding="5dp"
+            tools:ignore="HardcodedText" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/debugLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/deleteDataButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Delete Data" />
+
+            <Button
+                android:id="@+id/generateDataButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Generate Data" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/amplitudeText"
@@ -48,7 +83,7 @@
             android:text="Amplitude: 0"
             android:textSize="18sp"
             android:gravity="center"
-            android:padding="40dp"
+            android:padding="5dp"
             tools:ignore="HardcodedText" />
 
     </LinearLayout>
