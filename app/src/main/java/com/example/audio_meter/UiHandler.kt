@@ -23,6 +23,8 @@ import android.view.Gravity
 
 const val N_LEDS = 32
 const val TIME_SHIFT = 1693777500000L
+const val DB_HIGH = 20
+const val DB_STEP = -1
 
 @SuppressLint("SetTextI18n")
 class UiHandler(
@@ -45,7 +47,7 @@ class UiHandler(
     private var debugLayoutVisible = true
 
     init {
-        dbThresholds = getDbThresholds(startValue = 20, step = -1, nValues = N_LEDS)
+        dbThresholds = getDbThresholds()
         drawables = generateDrawables()
         initLeds()
         initChart()
@@ -207,13 +209,13 @@ class UiHandler(
         }
     }
 
-    private fun getDbThresholds(startValue: Int, step: Int, nValues: Int): List<Float> {
+    private fun getDbThresholds(): List<Float> {
         val dbThresholds = mutableListOf<Float>()
-        var currentValue = startValue
+        var currentValue = DB_HIGH
 
-        repeat(nValues) {
+        repeat(N_LEDS) {
             dbThresholds.add(currentValue.toFloat())
-            currentValue += step
+            currentValue += DB_STEP
         }
         return dbThresholds.reversed()
     }
@@ -227,7 +229,6 @@ class UiHandler(
             }
         }
     }
-
 
     private fun getDrawable(amplitude: Float, thresh: Float): Drawable {
         val redThresh = 12.0f
@@ -252,7 +253,7 @@ class UiHandler(
         val rgbColors = listOf<Int>(Color.GREEN, Color.argb(1.0f, 1.0f, 0.65f, 0.0f), Color.RED)
         return mapOf(
             "on" to rgbColors.map { createDrawable(it) },
-            "off" to rgbColors.map { darkenColor(it, 0.3) }.map { createDrawable(it) }
+            "off" to rgbColors.map { darkenColor(it) }.map { createDrawable(it) }
         )
     }
 
@@ -264,7 +265,8 @@ class UiHandler(
         return drawable
     }
 
-    private fun darkenColor(colorInt: Int, factor: Double): Int {
+    private fun darkenColor(colorInt: Int): Int {
+        val factor = 0.3
         val red = (Color.red(colorInt) * factor).toInt()
         val green = (Color.green(colorInt) * factor).toInt()
         val blue = (Color.blue(colorInt) * factor).toInt()
