@@ -20,8 +20,6 @@ import android.graphics.drawable.GradientDrawable
 
 
 const val N_LEDS = 28
-const val N_LEDS_ORANGE = N_LEDS - 1
-const val N_LEDS_GREEN = N_LEDS_ORANGE / 2
 const val SHIFT = 1693777500000L
 
 @SuppressLint("SetTextI18n")
