@@ -60,7 +60,13 @@
 
         <LinearLayout
             android:id="@+id/audioMeterLayout"
-            android:layout_width="50dp"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"></LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/audioMeterLayoutText"
+            android:layout_width="30dp"
             android:layout_height="match_parent"
             android:orientation="vertical"></LinearLayout>
 

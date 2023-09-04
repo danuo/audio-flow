@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.view.Gravity
 
 
 const val N_LEDS = 28
@@ -154,15 +155,29 @@ class UiHandler(
 
     private fun initLeds() {
         val audioMeterLayout = context.findViewById<LinearLayout>(R.id.audioMeterLayout)
-        val width = (Resources.getSystem().displayMetrics.density * 50).toInt()
-        val layoutParams = LinearLayout.LayoutParams(width, 0)
-        layoutParams.weight = 1f
+        val audioMeterLayoutText = context.findViewById<LinearLayout>(R.id.audioMeterLayoutText)
+        val widthView = (Resources.getSystem().displayMetrics.density * 40).toInt()
+        val widthText = (Resources.getSystem().displayMetrics.density * 30).toInt()
+        val layoutParamsView = LinearLayout.LayoutParams(widthView, 0)
+        layoutParamsView.weight = 1f
+        val layoutParamsText = LinearLayout.LayoutParams(widthText, 0)
+        layoutParamsText.weight = 1f
 
         for (i in 0 until N_LEDS) {
             val view = View(context)
-            view.layoutParams = layoutParams
+            view.layoutParams = layoutParamsView
             view.setBackgroundColor((0xFF000000).toInt())
             audioMeterLayout.addView(view)
+
+            if (i % 2 == 0) {
+                val thresh = dbThresholds[N_LEDS - 1 - i]
+                val text = TextView(context)
+                text.layoutParams = layoutParamsText
+                text.text = "$thresh"
+                text.textSize = 12f
+                text.gravity = Gravity.END
+                audioMeterLayoutText.addView(text)
+            }
         }
     }
 
