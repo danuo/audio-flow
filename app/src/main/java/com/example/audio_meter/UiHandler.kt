@@ -30,7 +30,7 @@ class UiHandler(
 ) {
 
     private val amplitudeTextView: TextView = context.findViewById(R.id.amplitudeText)
-    private val lineChart: LineChart = context.findViewById(R.id.lineChart)
+    private val chart: LineChart = context.findViewById(R.id.lineChart)
     private val audioMeterLayout: LinearLayout = context.findViewById((R.id.audioMeterLayout))
     private var amplitude: Int = 10
     private var nSamples: Int = 0
@@ -55,17 +55,43 @@ class UiHandler(
     }
 
     private fun initChart() {
-        lineChart.xAxis.valueFormatter = LineChartXAxisValueFormatter()
+        chart.xAxis.valueFormatter = LineChartXAxisValueFormatter()
     }
 
     fun updateChart(data: List<Value>) {
         val dataSet =
             LineDataSet(data.map { Entry((it.time - SHIFT).toFloat(), it.value) }, "Temperature")
+        dataSet.setDrawCircles(false)
+        dataSet.setDrawValues(false)
         dataSet.color = 0xFFFF0000.toInt()
-        dataSet.setCircleColor(0xFFFF0000.toInt())
         val lineData = LineData(dataSet)
-        lineChart.data = lineData
-        lineChart.invalidate()
+        chart.data = lineData
+
+        chart.isScaleXEnabled = true;
+        chart.isScaleYEnabled = true;
+        chart.setPinchZoom(true);
+        // disable description text
+        chart.description.isEnabled = false;
+
+        val xAxis = chart.xAxis;
+
+        // vertical grid lines
+        xAxis.enableGridDashedLine(10f, 10f, 0f);
+
+        // disable dual axis (only use LEFT axis)
+        chart.axisRight.isEnabled = false;
+
+        val yAxis = chart.axisLeft
+        // yAxis.axisMaximum = 200f;
+        // yAxis.axisMinimum = -50f;
+
+        // darkmode
+        // https://github.com/PhilJay/MPAndroidChart/issues/5015
+        // chart.setBackgroundColor(Color.BLACK)
+
+        chart.legend.isEnabled = false
+
+        chart.invalidate()
     }
 
     private fun initVolumeMeter() {
