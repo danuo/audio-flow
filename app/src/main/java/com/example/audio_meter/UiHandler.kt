@@ -21,7 +21,7 @@ import android.view.Gravity
 
 
 const val N_LEDS = 28
-const val SHIFT = 1693777500000L
+const val TIME_SHIFT = 1693777500000L
 
 @SuppressLint("SetTextI18n")
 class UiHandler(
@@ -96,7 +96,12 @@ class UiHandler(
 
     fun updateChart(data: List<Value>) {
         val dataSet =
-            LineDataSet(data.map { Entry((it.time - SHIFT).toFloat(), it.value) }, "Temperature")
+            LineDataSet(data.map {
+                Entry(
+                    (it.time - TIME_SHIFT).toFloat(),
+                    it.value + context.dbShift
+                )
+            }, "Temperature")
         dataSet.setDrawCircles(false)
         dataSet.setDrawValues(false)
         dataSet.color = 0xFFFF0000.toInt()
@@ -118,8 +123,8 @@ class UiHandler(
         chart.axisRight.isEnabled = false
 
         val yAxis = chart.axisLeft
-        // yAxis.axisMaximum = 200f
-        // yAxis.axisMinimum = -50f
+        yAxis.axisMaximum = dbThresholds.last()
+        yAxis.axisMinimum = dbThresholds.first()
 
         // dark mode
         // https://github.com/PhilJay/MPAndroidChart/issues/5015
@@ -137,7 +142,7 @@ class UiHandler(
         }
         if (data.containsKey("amplitudeDbu")) {
             amplitudeDbu = data["amplitudeDbu"]!!.toFloat()
-            effectiveAmplitudeDbu = amplitudeDbu - context.dbShift
+            effectiveAmplitudeDbu = amplitudeDbu + context.dbShift
         }
         if (data.containsKey("nSamples")) {
             nSamples = data["nSamples"]!!
@@ -269,7 +274,7 @@ class UiHandler(
 class LineChartXAxisValueFormatter : IndexAxisValueFormatter() {
     @SuppressLint("SimpleDateFormat")
     override fun getFormattedValue(value: Float): String {
-        val emissionsMilliSince1970Time = value.toLong() + SHIFT
+        val emissionsMilliSince1970Time = value.toLong() + TIME_SHIFT
         val timeMilliseconds = Date(emissionsMilliSince1970Time)
         val dateFormat = SimpleDateFormat("HH:mm")
         return dateFormat.format(timeMilliseconds)

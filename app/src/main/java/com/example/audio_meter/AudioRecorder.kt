@@ -48,7 +48,7 @@ class AudioRecorder(
         // factor 2 = 6 dB
         // factor 0.5 = -6 dB
         // rms of 32000 = 20 dBu
-        return 20 * log10(rms.toDouble()).toFloat() - 70
+        return 20 * log10(rms.toDouble()).toFloat()
     }
 
     fun toggleRecording() {
