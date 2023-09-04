@@ -39,14 +39,46 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="test stuff"
-            android:textSize="18sp"
-            android:gravity="center"
-            android:padding="5dp"
-            tools:ignore="HardcodedText" />
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/decreaseBig"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="-1" />
+
+            <Button
+                android:id="@+id/decreaseSmall"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="-0.1" />
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="mid" />
+
+            <Button
+                android:id="@+id/increaseSmall"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="+0.1" />
+
+            <Button
+                android:id="@+id/inCreaseBig"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="+1" />
+
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout

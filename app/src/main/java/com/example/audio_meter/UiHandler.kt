@@ -32,7 +32,8 @@ class UiHandler(
     private val chart: LineChart = context.findViewById(R.id.lineChart)
     private val audioMeterLayout: LinearLayout = context.findViewById((R.id.audioMeterLayout))
     private var amplitude: Int = 10
-    private var amplitudeDbu: Int = 10
+    private var amplitudeDbu: Float = 10f
+    private var effectiveAmplitudeDbu: Float = 10f
     private var nSamples: Int = 0
 
     private val drawables: Map<String, List<Drawable>>
@@ -135,7 +136,8 @@ class UiHandler(
             amplitude = data["amplitude"]!!
         }
         if (data.containsKey("amplitudeDbu")) {
-            amplitudeDbu = data["amplitudeDbu"]!!
+            amplitudeDbu = data["amplitudeDbu"]!!.toFloat()
+            effectiveAmplitudeDbu = amplitudeDbu - context.dbShift
         }
         if (data.containsKey("nSamples")) {
             nSamples = data["nSamples"]!!
@@ -147,7 +149,7 @@ class UiHandler(
 
     private fun updateText() {
         context.handler.post {
-            val outText = "Amp: $amplitude, AmpdBu: $amplitudeDbu, nSamples: $nSamples"
+            val outText = "Amp: $amplitude, AmpdBu: $effectiveAmplitudeDbu, nSamples: $nSamples"
             amplitudeTextView.text = outText
         }
     }
@@ -214,7 +216,7 @@ class UiHandler(
             for (index in 0 until N_LEDS) {
                 val thresh = dbThresholds[index]
                 val led = audioMeterLayout.getChildAt(N_LEDS - 1 - index) as View
-                led.background = getDrawable(amplitude.toFloat(), thresh)
+                led.background = getDrawable(effectiveAmplitudeDbu, thresh)
             }
         }
     }

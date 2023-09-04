@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
     lateinit var databaseHandler: DatabaseHandler
     lateinit var uiHandler: UiHandler
     val handler = Handler(Looper.getMainLooper())
-    var dbShift: Float = 0f
+    var dbShift: Float = -70f
     var showMinutes: Int = 60
 
     override fun onCreate(savedInstanceState: Bundle?) {
