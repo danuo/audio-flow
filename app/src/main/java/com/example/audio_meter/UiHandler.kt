@@ -19,6 +19,8 @@ import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
+import android.widget.EditText
+import kotlin.math.roundToInt
 
 
 const val N_LEDS = 32
@@ -32,6 +34,7 @@ class UiHandler(
 ) {
 
     private val amplitudeTextView: TextView = context.findViewById(R.id.amplitudeText)
+    private val dbShiftNum: EditText = context.findViewById(R.id.dbShiftNum)
     private val chart: LineChart = context.findViewById(R.id.lineChart)
     private val audioMeterLayout: LinearLayout = context.findViewById((R.id.audioMeterLayout))
     private var amplitude: Int = 10
@@ -54,6 +57,7 @@ class UiHandler(
         debugLayout = context.findViewById(R.id.debugLayout)
         optionsLayout = context.findViewById(R.id.optionsLayout)
         applyVisibility()
+        initOptions()
         val toggleOptionsButton: Button = context.findViewById(R.id.toggleOptionsButton)
         toggleOptionsButton.setOnClickListener {
             optionsLayoutVisible = !optionsLayoutVisible
@@ -80,6 +84,34 @@ class UiHandler(
                 context.audioRecorder.readAudioData()
             } else {
                 startRecordButton.text = "Start Recording"
+            }
+        }
+    }
+
+    private fun initOptions() {
+        val dbShiftSelectorLayout = context.findViewById<LinearLayout>(R.id.dbShiftSelector)
+        val editText = dbShiftSelectorLayout.getChildAt(0)
+        val values = listOf<Float>(-1f, -0.1f, 0f, 0.1f, 1f)
+        val texts = listOf<String>("-1dB", "-0.1dB", "", "+0.1dB", "+1dB")
+        dbShiftSelectorLayout.removeAllViews()
+
+        // button layout
+        val layoutParams = LinearLayout.LayoutParams(0, Button(context).height)
+        layoutParams.weight = 1f
+
+        for (i in 0 until 5) {
+            if (i == 2) {
+                dbShiftSelectorLayout.addView(editText)
+            } else {
+                val button = Button(context)
+                button.text = texts[i]
+                //button.layoutParams = layoutParams
+                button.setOnClickListener {
+                    context.dbShift += values[i]
+                    updateText()
+                }
+                // context.dbShift = context.dbShift.round(1)
+                dbShiftSelectorLayout.addView(button)
             }
         }
     }
@@ -146,7 +178,8 @@ class UiHandler(
         }
         if (data.containsKey("amplitudeDbu")) {
             amplitudeDbu = data["amplitudeDbu"]!!.toFloat()
-            effectiveAmplitudeDbu = amplitudeDbu + context.dbShift
+            effectiveAmplitudeDbu = (amplitudeDbu + context.dbShift).round(1)
+            // effectiveAmplitudeDbu = amplitudeDbu + context.dbShift
         }
         if (data.containsKey("nSamples")) {
             nSamples = data["nSamples"]!!
@@ -160,6 +193,7 @@ class UiHandler(
         context.handler.post {
             val outText = "Amp: $amplitude, AmpdBu: $effectiveAmplitudeDbu, nSamples: $nSamples"
             amplitudeTextView.text = outText
+            dbShiftNum.setText(context.dbShift.round(1).toString())
         }
     }
 
@@ -293,4 +327,11 @@ class LineChartXAxisValueFormatter : IndexAxisValueFormatter() {
         val dateFormat = SimpleDateFormat("HH:mm")
         return dateFormat.format(timeMilliseconds)
     }
+}
+
+
+fun Float.round(decimals: Int): Float {
+    var multiplier = 1.0f
+    repeat(decimals) { multiplier *= 10f }
+    return (this * multiplier).roundToInt() / multiplier
 }
