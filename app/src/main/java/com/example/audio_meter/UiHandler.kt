@@ -35,11 +35,15 @@ class UiHandler(
     private var amplitude: Int = 10
     private var nSamples: Int = 0
 
+    private val drawables: Map<String, List<Drawable>>
+    private val dbThresholds: List<Float>
     private val extraOptionsLayout: LinearLayout
     private var extraOptionsVisible = true
 
     init {
-        initVolumeMeter()
+        dbThresholds = getDbThresholds(startValue = 20, step = -2, nValues = N_LEDS)
+        drawables = generateDrawables()
+        initLeds()
         initChart()
         extraOptionsLayout = context.findViewById(R.id.extraOptions)
         applyVisibility()
@@ -112,21 +116,6 @@ class UiHandler(
         chart.invalidate()
     }
 
-    private fun initVolumeMeter() {
-        val audioMeterLayout = context.findViewById<LinearLayout>(R.id.audioMeterLayout)
-
-        val width = (Resources.getSystem().displayMetrics.density * 50).toInt()
-
-        val layoutParams = LinearLayout.LayoutParams(width, 0)
-        layoutParams.weight = 1f
-
-        for (i in 0 until N_LEDS) {
-            val view = View(context)
-            view.layoutParams = layoutParams
-            view.setBackgroundColor((0xFF000000).toInt())
-            audioMeterLayout.addView(view)
-        }
-    }
 
     fun updateUI(data: Map<String, Int>) {
         if (data.containsKey("amplitude")) {
@@ -147,33 +136,6 @@ class UiHandler(
         }
     }
 
-    private fun updateLeds() {
-        context.handler.post {
-            val outText = "Amplitude: $amplitude, nSamples: $nSamples"
-            amplitudeTextView.text = outText
-        }
-
-        val thresh: Int = amplitude / 1000
-        for (index in 0 until N_LEDS) {
-            val led = audioMeterLayout.getChildAt(N_LEDS - 1 - index) as View
-            if (index < thresh) {
-                // led.setBackgroundColor(getColorForAudioLevelOn(amplitude))
-                led.background = getDrawable(getColorForAudioLevelOn(amplitude))
-            } else {
-                // led.setBackgroundColor(getColorForAudioLevelOff(amplitude))
-                led.background = getDrawable(getColorForAudioLevelOff(amplitude))
-            }
-        }
-    }
-
-    private fun getDrawable(color: Int): Drawable {
-        val drawable = GradientDrawable()
-        drawable.shape = GradientDrawable.RECTANGLE
-        drawable.setColor(color)
-        drawable.setStroke(4, Color.BLACK)
-        return drawable
-    }
-
     private fun showConfirmationDialog() {
         val builder = AlertDialog.Builder(context)
         builder.setMessage("Do you want to delete all data?")
@@ -192,24 +154,85 @@ class UiHandler(
         alert.show()
     }
 
-    private fun getColorForAudioLevelOn(amplitude: Int): Int {
-        return if (amplitude > 10000) {
-            0xFFFF0000.toInt() // red
-        } else if (amplitude > 7000) {
-            0xFFff4433.toInt() // orange
-        } else {
-            0xFF008000.toInt() // green
+    private fun initLeds() {
+        val audioMeterLayout = context.findViewById<LinearLayout>(R.id.audioMeterLayout)
+        val width = (Resources.getSystem().displayMetrics.density * 50).toInt()
+        val layoutParams = LinearLayout.LayoutParams(width, 0)
+        layoutParams.weight = 1f
+
+        for (i in 0 until N_LEDS) {
+            val view = View(context)
+            view.layoutParams = layoutParams
+            view.setBackgroundColor((0xFF000000).toInt())
+            audioMeterLayout.addView(view)
         }
     }
 
-    private fun getColorForAudioLevelOff(amplitude: Int): Int {
-        return if (amplitude > 10000) {
-            0xFF400000.toInt() // red
-        } else if (amplitude > 7000) {
-            0xFF40110D.toInt() // orange
-        } else {
-            0xFF002000.toInt() // green
+    private fun getDbThresholds(startValue: Int, step: Int, nValues: Int): List<Float> {
+        val dbThresholds = mutableListOf<Float>()
+        var currentValue = startValue
+
+        repeat(nValues) {
+            dbThresholds.add(currentValue.toFloat())
+            currentValue += step
         }
+        return dbThresholds.reversed()
+    }
+
+    private fun updateLeds() {
+        context.handler.post {
+            val outText = "Amplitude: $amplitude, nSamples: $nSamples"
+            amplitudeTextView.text = outText
+        }
+
+        for (index in 0 until N_LEDS) {
+            val thresh = dbThresholds[index]
+            val led = audioMeterLayout.getChildAt(N_LEDS - 1 - index) as View
+            led.background = getDrawable(amplitude.toFloat(), thresh)
+        }
+    }
+
+
+    private fun getDrawable(amplitude: Float, thresh: Float): Drawable {
+        val redThresh = 14.0f
+        val orangeThresh = 8.0f
+        val ledOn = amplitude > thresh
+        val key = if (ledOn) {
+            "on"
+        } else {
+            "off"
+        }
+        val colorIndex = if (thresh >= redThresh) {
+            2
+        } else if (thresh >= orangeThresh) {
+            1
+        } else {
+            0
+        }
+        return drawables[key]!![colorIndex]
+    }
+
+    private fun generateDrawables(): Map<String, List<Drawable>> {
+        val rgbColors = listOf<Int>(Color.GREEN, Color.argb(1.0f, 1.0f, 0.65f, 0.0f), Color.RED)
+        return mapOf(
+            "on" to rgbColors.map { createDrawable(it) },
+            "off" to rgbColors.map { darkenColor(it, 0.3) }.map { createDrawable(it) }
+        )
+    }
+
+    private fun createDrawable(color: Int): Drawable {
+        val drawable = GradientDrawable()
+        drawable.shape = GradientDrawable.RECTANGLE
+        drawable.setColor(color)
+        drawable.setStroke(4, Color.BLACK)
+        return drawable
+    }
+
+    private fun darkenColor(colorInt: Int, factor: Double): Int {
+        val red = (Color.red(colorInt) * factor).toInt()
+        val green = (Color.green(colorInt) * factor).toInt()
+        val blue = (Color.blue(colorInt) * factor).toInt()
+        return Color.argb(255, red, green, blue)
     }
 }
 
