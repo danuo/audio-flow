@@ -19,8 +19,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        audioRecorder = AudioRecorder(this)
         setContentView(R.layout.activity_main)
+        audioRecorder = AudioRecorder(this)
         uiHandler = UiHandler(this)
         databaseHandler = DatabaseHandler(context = this, uiHandler = uiHandler)
         startServer(this, databaseHandler)

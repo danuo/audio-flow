@@ -1,12 +1,10 @@
 package com.example.audio_meter
 
+import android.util.Log
 import android.content.Context
-import androidx.activity.ComponentActivity
 import androidx.annotation.WorkerThread
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.room.Dao
 import androidx.room.Database
@@ -19,6 +17,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
+import androidx.lifecycle.lifecycleScope
 
 
 @Entity(tableName = "data_table")
@@ -52,7 +52,6 @@ interface ValueDao {
 }
 
 
-// Annotates class to be a Room Database with a table (entity)
 @Database(entities = [Value::class], version = 1, exportSchema = false)
 abstract class ValueDatabase : RoomDatabase() {
 
@@ -80,10 +79,8 @@ abstract class ValueDatabase : RoomDatabase() {
 
 
 class ValueRepository(private val valueDao: ValueDao) {
-    val getDataCount: Flow<Int> = valueDao.getDataCount()
-
-    fun getValuesAll(): List<Value> {
-        return valueDao.getValuesAll()
+    fun getDataCount(): Flow<Int> {
+        return valueDao.getDataCount()
     }
 
     fun getValuesNewerThan(timeStamp: Long): Flow<List<Value>> {
@@ -107,22 +104,19 @@ class ValueRepository(private val valueDao: ValueDao) {
 }
 
 
-class ValueViewModel(private val repository: ValueRepository) : ViewModel() {
-    val getDataCount: LiveData<Int> = repository.getDataCount.asLiveData()
-
-    fun getAllValues(): List<Value> {
-        return repository.getValuesAll()
+class ValueViewModel(
+    private val context: MainActivity,
+    private val repository: ValueRepository
+) :
+    ViewModel() {
+    fun getDataCount(): Flow<Int> {
+        return repository.getDataCount()
     }
 
-    // Using LiveData and caching what allWords returns has several benefits:
-    // - We can put an observer on the data (instead of polling for changes) and only update the
-    //   the UI when the data actually changes.
-    // - Repository is completely separated from the UI through the ViewModel.
-    fun getValuesNewerThan(timeStamp: Long): LiveData<List<Value>> {
-        return repository.getValuesNewerThan(timeStamp).asLiveData()
+    fun getValuesNewerThan(timeStamp: Long): Flow<List<Value>> {
+        return repository.getValuesNewerThan(timeStamp)
     }
 
-    // launching a new coroutine to insert the data in a non-blocking way
     fun insert(value: Value) = viewModelScope.launch {
         repository.insert(value)
     }
@@ -138,37 +132,55 @@ class ValueViewModel(private val repository: ValueRepository) : ViewModel() {
 
 
 @Suppress("UNCHECKED_CAST")
-class ValueViewModelFactory(private val repository: ValueRepository) : ViewModelProvider.Factory {
+class ValueViewModelFactory(
+    private val context: MainActivity,
+    private val repository: ValueRepository
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return ValueViewModel(repository) as T
+        return ValueViewModel(context, repository) as T
     }
 }
 
 
 class DatabaseHandler(
-    context: MainActivity,
+    private val context: MainActivity,
     private val uiHandler: UiHandler,
 ) {
     private val database = ValueDatabase.getDatabase(context)
     private val repository = ValueRepository(database.valueDao())
-    private val factory = ValueViewModelFactory(repository)
+    private val factory = ValueViewModelFactory(context, repository)
     private val viewModel =
         ViewModelProvider(context, factory).get(modelClass = ValueViewModel::class.java)
 
-    var dataCount: Int = 0
+    var dataCount: Int = 10
     var newestData = listOf<Value>()
+
+    private var job: Job? = null
 
     init {
         cleanupDatabase()
-        viewModel.getDataCount.observe(context) { data ->
-            dataCount = data
-            uiHandler.updateUI(mapOf("nSamples" to dataCount))
+        context.lifecycleScope.launch {
+            viewModel.getDataCount().collect() { data ->
+                dataCount = data
+                uiHandler.updateUI(mapOf("nSamples" to dataCount))
+            }
         }
-        val time = System.currentTimeMillis() - context.showMilliseconds
-        viewModel.getValuesNewerThan(time).observe(context) { data ->
-            newestData = data
-            if (data.isNotEmpty()) {
-                uiHandler.updateChart(data)
+        renewDataQuery()
+    }
+
+    fun renewDataQuery() {
+        val initTime = System.currentTimeMillis()
+        val timeStamp = initTime - context.showMilliseconds
+        (job as? Job)?.cancel()
+        job = context.lifecycleScope.launch {
+            viewModel.getValuesNewerThan(timeStamp).collect() { data ->
+                newestData = data
+                if (data.isNotEmpty()) {
+                    uiHandler.updateChart(data)
+                }
+                if (System.currentTimeMillis() - initTime > 1000 * 10) {
+                    renewDataQuery()
+                }
             }
         }
     }

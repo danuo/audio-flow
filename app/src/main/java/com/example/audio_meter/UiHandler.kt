@@ -111,6 +111,7 @@ class UiHandler(
             // button.layoutParams = layoutParams
             button.setOnClickListener {
                 context.showMilliseconds = valuesTimeButtons[i]
+                context.databaseHandler.renewDataQuery()
                 updateText()
             }
             timeSelector.addView(button)
@@ -129,6 +130,8 @@ class UiHandler(
                 dbShiftSelectorLayout.addView(button)
             }
         }
+        updateText()
+        updateLeds()
     }
 
     private fun applyVisibility() {
