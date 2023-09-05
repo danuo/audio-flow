@@ -46,8 +46,8 @@ class UiHandler(
     private val dbThresholds: List<Float>
     private val optionsLayout: LinearLayout
     private val debugLayout: LinearLayout
-    private var optionsLayoutVisible = true
-    private var debugLayoutVisible = true
+    private var optionsLayoutVisible = false
+    private var debugLayoutVisible = false
 
     private val buttonHeight: Int
 
@@ -177,6 +177,7 @@ class UiHandler(
         xAxis.enableGridDashedLine(10f, 10f, 0f)
 
         // disable dual axis (only use LEFT axis)
+        chart.axisLeft.setDrawLabels(false)
         chart.axisRight.setDrawLabels(false)
 
         val yAxis = chart.axisLeft
@@ -185,7 +186,9 @@ class UiHandler(
 
         // dark mode
         // https://github.com/PhilJay/MPAndroidChart/issues/5015
-        // chart.setBackgroundColor(Color.BLACK)
+        xAxis.textColor = Color.WHITE
+        yAxis.textColor = Color.WHITE
+        chart.setBackgroundColor(Color.BLACK)
 
         chart.description.isEnabled = false
         chart.legend.isEnabled = false
