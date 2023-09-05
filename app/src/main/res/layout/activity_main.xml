@@ -14,21 +14,21 @@
         <Button
             android:id="@+id/toggleOptionsButton"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="55dp"
             android:layout_weight="0.5"
             android:text="Options" />
 
         <Button
             android:id="@+id/toggleDebugButton"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="55dp"
             android:layout_weight="0.5"
             android:text="Debug" />
 
         <Button
             android:id="@+id/startButton"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="55dp"
             android:layout_weight="1"
             android:text="Start Recording"
             tools:ignore="ButtonStyle" />
@@ -40,11 +40,25 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="select time frame"
+            android:textSize="11sp"
+            android:paddingLeft="10dp"></TextView>
+
         <LinearLayout
             android:id="@+id/timeSelector"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"></LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="adjust dB shift"
+            android:textSize="11sp"
+            android:paddingLeft="10dp"></TextView>
 
         <LinearLayout
             android:id="@+id/dbShiftSelector"
@@ -55,7 +69,7 @@
             <EditText
                 android:id="@+id/dbShiftNum"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="55dp"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
                 android:enabled="true"

@@ -49,6 +49,8 @@ class UiHandler(
     private var optionsLayoutVisible = true
     private var debugLayoutVisible = true
 
+    private val buttonHeight: Int
+
     init {
         dbThresholds = getDbThresholds()
         drawables = generateDrawables()
@@ -57,12 +59,13 @@ class UiHandler(
         debugLayout = context.findViewById(R.id.debugLayout)
         optionsLayout = context.findViewById(R.id.optionsLayout)
         applyVisibility()
-        initOptions()
+        initOptionButtons()
         val toggleOptionsButton: Button = context.findViewById(R.id.toggleOptionsButton)
         toggleOptionsButton.setOnClickListener {
             optionsLayoutVisible = !optionsLayoutVisible
             applyVisibility()
         }
+        buttonHeight = toggleOptionsButton.height.toInt()
         val toggleDebugButton: Button = context.findViewById(R.id.toggleDebugButton)
         toggleDebugButton.setOnClickListener {
             debugLayoutVisible = !debugLayoutVisible
@@ -88,7 +91,7 @@ class UiHandler(
         }
     }
 
-    private fun initOptions() {
+    private fun initOptionButtons() {
         val timeSelector = context.findViewById<LinearLayout>(R.id.timeSelector)
         val dbShiftSelectorLayout = context.findViewById<LinearLayout>(R.id.dbShiftSelector)
         val editText = dbShiftSelectorLayout.getChildAt(0)
@@ -100,15 +103,16 @@ class UiHandler(
         dbShiftSelectorLayout.removeAllViews()
 
         // button layout
-        val height = Button(context).height
-        val layoutParams = LinearLayout.LayoutParams(0, 20)
+        val height = (Resources.getSystem().displayMetrics.density * 55).toInt()
+        val layoutParams = LinearLayout.LayoutParams(0, height)
         layoutParams.weight = 1f
 
         for (i in 0 until 5) {
             // time frame
             val button = Button(context)
             button.text = textTimeButtons[i]
-            // button.layoutParams = layoutParams
+            // button.textSize = 10f
+            button.layoutParams = layoutParams
             button.setOnClickListener {
                 context.showMilliseconds = valuesTimeButtons[i]
                 context.databaseHandler.renewDataQuery()
@@ -122,7 +126,7 @@ class UiHandler(
             } else {
                 val button = Button(context)
                 button.text = textsDbButtons[i]
-                // button.layoutParams = layoutParams
+                button.layoutParams = layoutParams
                 button.setOnClickListener {
                     context.dbShift += valuesDbButtons[i]
                     updateText()
@@ -257,6 +261,7 @@ class UiHandler(
                 text.text = "$thresh"
                 text.textSize = 12f
                 text.gravity = Gravity.END
+                text.setPadding(0, 0, 10, 0)
                 audioMeterLayoutText.addView(text)
             }
         }
