@@ -37,9 +37,9 @@ class UiHandler(
     private val dbShiftNum: EditText = context.findViewById(R.id.dbShiftNum)
     private val chart: LineChart = context.findViewById(R.id.lineChart)
     private val audioMeterLayout: LinearLayout = context.findViewById((R.id.audioMeterLayout))
-    private var amplitude: Int = 10
-    private var amplitudeDbu: Float = 10f
-    private var effectiveAmplitudeDbu: Float = 10f
+    private var amplitude: Int = 1
+    private var amplitudeDbu: Float = -50f
+    private var effectiveAmplitudeDbu: Float = -50f
     private var nSamples: Int = 0
 
     private val drawables: Map<String, List<Drawable>>
@@ -178,7 +178,9 @@ class UiHandler(
 
         // disable dual axis (only use LEFT axis)
         chart.axisLeft.setDrawLabels(false)
+        chart.axisLeft.setDrawGridLines(false)
         chart.axisRight.setDrawLabels(false)
+        chart.axisRight.setDrawGridLines(true)
 
         val yAxis = chart.axisLeft
         yAxis.axisMaximum = dbThresholds.last()
@@ -193,6 +195,14 @@ class UiHandler(
         chart.description.isEnabled = false
         chart.legend.isEnabled = false
 
+        chart.minOffset = 3f
+        chart.extraTopOffset = 6f
+        //chart.offsetLeftAndRight(0)
+        //chart.setViewPortOffsets(3f, 50f, 3f, 10f)
+        chart.isDragEnabled = false
+        chart.isDoubleTapToZoomEnabled = false
+        chart.isHighlightPerDragEnabled = false
+        chart.isHighlightPerTapEnabled = false
         chart.invalidate()
     }
 
@@ -245,7 +255,7 @@ class UiHandler(
         val audioMeterLayout = context.findViewById<LinearLayout>(R.id.audioMeterLayout)
         val audioMeterLayoutText = context.findViewById<LinearLayout>(R.id.audioMeterLayoutText)
         val widthView = (Resources.getSystem().displayMetrics.density * 40).toInt()
-        val widthText = (Resources.getSystem().displayMetrics.density * 30).toInt()
+        val widthText = (Resources.getSystem().displayMetrics.density * 40).toInt()
         val layoutParamsView = LinearLayout.LayoutParams(widthView, 0)
         layoutParamsView.weight = 1f
         val layoutParamsText = LinearLayout.LayoutParams(widthText, 0)
@@ -262,7 +272,7 @@ class UiHandler(
                 val text = TextView(context)
                 text.layoutParams = layoutParamsText
                 text.text = "$thresh"
-                text.textSize = 12f
+                text.textSize = 11f
                 text.gravity = Gravity.END
                 text.setPadding(0, 0, 10, 0)
                 audioMeterLayoutText.addView(text)

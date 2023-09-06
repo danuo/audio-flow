@@ -48,7 +48,7 @@ class AudioRecorder(
         // factor 2 = 6 dB
         // factor 0.5 = -6 dB
         // rms of 32000 = 20 dBu
-        return 20 * log10(rms.toDouble()).toFloat()
+        return 20 * log10(0.00001 + rms.toDouble()).toFloat()
     }
 
     fun toggleRecording() {
@@ -73,14 +73,7 @@ class AudioRecorder(
     }
 
     private fun calculateMaxAmplitude(audioBuffer: ShortArray): Int {
-        var max = 0
-        for (sample in audioBuffer) {
-            val amplitude = abs(sample.toInt())
-            if (amplitude > max) {
-                max = amplitude
-            }
-        }
-        return max
+        return audioBuffer.maxOrNull()!!.toInt()
     }
 
     private fun processAmplitude(amplitude: Int) {
