@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlin.math.abs
@@ -17,26 +18,54 @@ class AudioRecorder(
     private val context: MainActivity
 ) {
     var isRecording = false
-    private val audioRecord: AudioRecord
+    private var audioRecord: AudioRecord? = null
 
     private val nGroup: Int = 30  // every 3 seconds
     private var counter: Int = 0
     private var valSquareSum: Double = 0.0
 
     init {
-        checkRecordPermission()
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            initAudio()
+        } else {
+            val requestPermissionLauncher =
+                context.registerForActivityResult(
+                    ActivityResultContracts.RequestPermission()
+                ) { isGranted: Boolean ->
+                    if (isGranted) {
+                        initAudio()
+                    }
+                }
+
+            requestPermissionLauncher.launch(
+                Manifest.permission.RECORD_AUDIO
+            )
+        }
+    }
+
+    private fun initAudio() {
         val minBufferSize = AudioRecord.getMinBufferSize(
             SAMPLE_RATE,
             AudioFormat.CHANNEL_IN_MONO,
             AudioFormat.ENCODING_PCM_16BIT
         )
-        audioRecord = AudioRecord(
-            MediaRecorder.AudioSource.MIC,
-            SAMPLE_RATE,
-            AudioFormat.CHANNEL_IN_MONO,
-            AudioFormat.ENCODING_PCM_16BIT,
-            minBufferSize
-        )
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            audioRecord = AudioRecord(
+                MediaRecorder.AudioSource.MIC,
+                SAMPLE_RATE,
+                AudioFormat.CHANNEL_IN_MONO,
+                AudioFormat.ENCODING_PCM_16BIT,
+                minBufferSize
+            )
+        }
     }
 
     companion object {
@@ -53,11 +82,13 @@ class AudioRecorder(
 
     fun toggleRecording() {
         if (isRecording) {
+            audioRecord!!.stop()
             isRecording = false
-            audioRecord.stop()
         } else {
-            isRecording = true
-            audioRecord.startRecording()
+            if (audioRecord is AudioRecord) {
+                audioRecord!!.startRecording()
+                isRecording = true
+            }
         }
     }
 
@@ -65,7 +96,7 @@ class AudioRecorder(
         Thread {
             val audioBuffer = ShortArray(BUFFER_SIZE)
             while (this.isRecording) {
-                audioRecord.read(audioBuffer, 0, BUFFER_SIZE)
+                audioRecord!!.read(audioBuffer, 0, BUFFER_SIZE)
                 val maxAmplitude = calculateMaxAmplitude(audioBuffer)
                 processAmplitude(maxAmplitude)
             }
@@ -101,15 +132,4 @@ class AudioRecorder(
         }
     }
 
-    private fun checkRecordPermission() {
-        val permission = Manifest.permission.RECORD_AUDIO
-        val permissionCheck = ContextCompat.checkSelfPermission(context, permission)
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                context,
-                arrayOf(Manifest.permission.RECORD_AUDIO),
-                1
-            )
-        }
-    }
 }

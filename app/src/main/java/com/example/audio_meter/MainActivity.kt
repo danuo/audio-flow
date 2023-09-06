@@ -46,7 +46,7 @@ class MainActivity : ComponentActivity() {
         const val REFRESH_RATE = 10
     }
 
-    private fun startServer(context: ComponentActivity, databaseHandler: DatabaseHandler) {
+    private fun startServer(context: MainActivity, databaseHandler: DatabaseHandler) {
         CoroutineScope(Dispatchers.IO).launch {
             Server(context, databaseHandler)
         }
