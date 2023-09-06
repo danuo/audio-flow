@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>State Display</title>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/moment@^2"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@^1"></script>
-        <style>
+  <head>
+    <title>State Display</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@^2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@^1"></script>
+    <style>
       body,
       html {
         width: 100%;
@@ -23,15 +23,13 @@
         padding: 1em;
       }
       /* Center the canvas element */
-
-
-        </style>
-    </head>
-    <body>
-        <div>
-            <canvas id="chartCanvas"></canvas>
-        </div>
-        <script>
+    </style>
+  </head>
+  <body>
+    <div>
+      <canvas id="chartCanvas"></canvas>
+    </div>
+    <script>
       async function fetchData() {
         try {
           const response = await fetch("/data");
@@ -71,6 +69,8 @@
           ],
         },
         options: {
+          devicePixelRatio: 4,
+          responsive: true,
           maintainAspectRatio: false,
 
           scales: {
@@ -124,8 +124,6 @@
       setInterval(function () {
         updateChart(chart);
       }, 1000 * 5); // every 5 sek
-
-
-        </script>
-    </body>
+    </script>
+  </body>
 </html>
