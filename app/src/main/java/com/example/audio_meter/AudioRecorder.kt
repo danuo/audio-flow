@@ -82,11 +82,11 @@ class AudioRecorder(
 
     fun toggleRecording() {
         if (isRecording) {
-            audioRecord!!.stop()
+            audioRecord?.stop()
             isRecording = false
         } else {
             if (audioRecord is AudioRecord) {
-                audioRecord!!.startRecording()
+                audioRecord?.startRecording()
                 isRecording = true
             }
         }
@@ -96,7 +96,7 @@ class AudioRecorder(
         Thread {
             val audioBuffer = ShortArray(BUFFER_SIZE)
             while (this.isRecording) {
-                audioRecord!!.read(audioBuffer, 0, BUFFER_SIZE)
+                audioRecord?.read(audioBuffer, 0, BUFFER_SIZE)
                 val maxAmplitude = calculateMaxAmplitude(audioBuffer)
                 processAmplitude(maxAmplitude)
             }
