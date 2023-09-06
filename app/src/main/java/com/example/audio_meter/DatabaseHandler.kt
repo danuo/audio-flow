@@ -1,6 +1,5 @@
 package com.example.audio_meter
 
-import android.util.Log
 import android.content.Context
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.ViewModel
@@ -171,7 +170,7 @@ class DatabaseHandler(
     fun renewDataQuery() {
         val initTime = System.currentTimeMillis()
         val timeStamp = initTime - context.showMilliseconds
-        (job as? Job)?.cancel()
+        job?.cancel()
         job = context.lifecycleScope.launch {
             viewModel.getValuesNewerThan(timeStamp).collect() { data ->
                 newestData = data
