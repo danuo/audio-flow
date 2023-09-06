@@ -104,7 +104,6 @@ class ValueRepository(private val valueDao: ValueDao) {
 
 
 class ValueViewModel(
-    private val context: MainActivity,
     private val repository: ValueRepository
 ) :
     ViewModel() {
@@ -132,11 +131,10 @@ class ValueViewModel(
 
 @Suppress("UNCHECKED_CAST")
 class ValueViewModelFactory(
-    private val context: MainActivity,
     private val repository: ValueRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return ValueViewModel(context, repository) as T
+        return ValueViewModel(repository) as T
     }
 }
 
@@ -147,7 +145,7 @@ class DatabaseHandler(
 ) {
     private val database = ValueDatabase.getDatabase(context)
     private val repository = ValueRepository(database.valueDao())
-    private val factory = ValueViewModelFactory(context, repository)
+    private val factory = ValueViewModelFactory(repository)
     private val viewModel =
         ViewModelProvider(context, factory).get(modelClass = ValueViewModel::class.java)
 
@@ -193,9 +191,9 @@ class DatabaseHandler(
         viewModel.deleteAll()
     }
 
-    fun cleanupDatabase() {
+    private fun cleanupDatabase() {
         // delete data that is older than 10 days
-        var time: Long = System.currentTimeMillis() - 10 * 24 * 3600 * 1000
+        val time: Long = System.currentTimeMillis() - 10 * 24 * 3600 * 1000
         viewModel.deleteOlderThan(time)
     }
 }
