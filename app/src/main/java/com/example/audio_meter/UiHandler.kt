@@ -109,7 +109,7 @@ class UiHandler(
 
         for (i in 0 until 5) {
             // time frame
-            val button = Button(context)
+            var button = Button(context)
             button.text = textTimeButtons[i]
             // button.textSize = 10f
             button.layoutParams = layoutParams
@@ -124,7 +124,7 @@ class UiHandler(
             if (i == 2) {
                 dbShiftSelectorLayout.addView(editText)
             } else {
-                val button = Button(context)
+                button = Button(context)
                 button.text = textsDbButtons[i]
                 button.layoutParams = layoutParams
                 button.setOnClickListener {
