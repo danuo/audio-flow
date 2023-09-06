@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>State Display</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/moment@^2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@^1"></script>
-    <style>
+    <head>
+        <title>State Display</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/moment@^2"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@^1"></script>
+        <style>
       body,
       html {
         width: 100%;
@@ -23,14 +23,16 @@
         padding: 1em;
       }
       /* Center the canvas element */
-    </style>
-  </head>
-  <body>
-    <div>
-      <canvas id="chartCanvas"></canvas>
-    </div>
-    <script>
-      async function fetchTemperatureData() {
+
+
+        </style>
+    </head>
+    <body>
+        <div>
+            <canvas id="chartCanvas"></canvas>
+        </div>
+        <script>
+      async function fetchData() {
         try {
           const response = await fetch("/data");
           if (!response.ok) {
@@ -44,7 +46,7 @@
       }
 
       async function updateChart(chart) {
-        const data = await fetchTemperatureData();
+        const data = await fetchData();
 
         // Update the chart with the fetched data
         chart.data.labels = data.time;
@@ -60,10 +62,11 @@
           labels: [],
           datasets: [
             {
-              label: "Temperature (°C)",
+              label: "max volume",
               data: [],
               borderColor: "rgb(255, 99, 132)",
               fill: false,
+              pointStyle: false,
             },
           ],
         },
@@ -121,6 +124,8 @@
       setInterval(function () {
         updateChart(chart);
       }, 1000 * 5); // every 5 sek
-    </script>
-  </body>
+
+
+        </script>
+    </body>
 </html>
