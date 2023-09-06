@@ -9,11 +9,11 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import android.content.Context
 
-class Server(contextRoot: Context, private val databaseHandler: DatabaseHandler) {
+class Server(private val context: MainActivity, private val databaseHandler: DatabaseHandler) {
     private val gson = Gson()
     private val htmlResourceId = R.raw.index
     private val htmlString =
-        loadHtmlResourceToString(context = contextRoot, htmlResourceId).trimIndent()
+        loadHtmlResourceToString(context = context, htmlResourceId).trimIndent()
 
     init {
         startServer()
@@ -43,7 +43,7 @@ class Server(contextRoot: Context, private val databaseHandler: DatabaseHandler)
     private fun getDataFromDatabase(): Map<String, List<Any>> {
         val data = databaseHandler.newestData
         return mapOf<String, List<Any>>("time" to data.map { it.time },
-            "values" to data.map { it.value })
+            "values" to data.map { it.value + context.dbShift })
     }
 
     private fun loadHtmlResourceToString(context: Context, resourceId: Int): String {
