@@ -35,6 +35,7 @@ class UiHandler(
 
     private val amplitudeTextView: TextView = context.findViewById(R.id.amplitudeText)
     private val dbShiftNum: EditText = context.findViewById(R.id.dbShiftNum)
+    private val dbTargetNum: EditText = context.findViewById(R.id.dbTargetNum)
     private val chart: LineChart = context.findViewById(R.id.lineChart)
     private val audioMeterLayout: LinearLayout = context.findViewById((R.id.audioMeterLayout))
     private var amplitude: Int = 1
@@ -93,14 +94,18 @@ class UiHandler(
 
     private fun initOptionButtons() {
         val timeSelector = context.findViewById<LinearLayout>(R.id.timeSelector)
+        val targetSelector = context.findViewById<LinearLayout>(R.id.dbTargetSelector)
         val dbShiftSelectorLayout = context.findViewById<LinearLayout>(R.id.dbShiftSelector)
-        val editText = dbShiftSelectorLayout.getChildAt(0)
+        val dbTargetSelectorLayout = context.findViewById<LinearLayout>(R.id.dbTargetSelector)
+        val editTextDbShift = dbShiftSelectorLayout.getChildAt(0)
+        val editTextDbTarget = targetSelector.getChildAt(0)
         val valuesTimeButtons =
             listOf<Long>(6 * 3600 * 1000, 3 * 3600 * 1000, 3600 * 1000, 1800 * 1000, 600 * 1000)
         val textTimeButtons = listOf<String>("6h", "3h", "1h", "30m", "10m")
         val valuesDbButtons = listOf<Float>(-1f, -0.1f, 0f, 0.1f, 1f)
         val textsDbButtons = listOf<String>("-1", "-0.1", "", "+0.1", "+1")
         dbShiftSelectorLayout.removeAllViews()
+        dbTargetSelectorLayout.removeAllViews()
 
         // button layout
         val height = (Resources.getSystem().displayMetrics.density * 55).toInt()
@@ -120,10 +125,12 @@ class UiHandler(
             }
             timeSelector.addView(button)
 
-            // dbshift
+            // dbShift and dbTarget
             if (i == 2) {
-                dbShiftSelectorLayout.addView(editText)
+                dbShiftSelectorLayout.addView(editTextDbShift)
+                dbTargetSelectorLayout.addView((editTextDbTarget))
             } else {
+                // shift selector
                 button = Button(context)
                 button.text = textsDbButtons[i]
                 button.layoutParams = layoutParams
@@ -132,6 +139,16 @@ class UiHandler(
                     updateText()
                 }
                 dbShiftSelectorLayout.addView(button)
+
+                // target selector
+                button = Button(context)
+                button.text = textsDbButtons[i]
+                button.layoutParams = layoutParams
+                button.setOnClickListener {
+                    context.dbTarget += valuesDbButtons[i]
+                    updateText()
+                }
+                dbTargetSelectorLayout.addView(button)
             }
         }
         updateText()
@@ -153,6 +170,37 @@ class UiHandler(
 
     private fun initChart() {
         chart.xAxis.valueFormatter = LineChartXAxisValueFormatter()
+        chart.xAxis.enableGridDashedLine(10f, 10f, 0f)
+
+        chart.isScaleXEnabled = false
+        chart.isScaleYEnabled = false
+        chart.setPinchZoom(false)
+
+        chart.isDragEnabled = false
+        chart.isDoubleTapToZoomEnabled = false
+        chart.isHighlightPerDragEnabled = false
+        chart.isHighlightPerTapEnabled = false
+
+        chart.axisLeft.setDrawLabels(false)
+        chart.axisLeft.setDrawGridLines(false)
+        chart.axisRight.setDrawLabels(false)
+        chart.axisRight.setDrawGridLines(true)
+        chart.description.isEnabled = false
+        chart.legend.isEnabled = false
+
+        chart.axisLeft.axisMaximum = dbThresholds.last()
+        chart.axisLeft.axisMinimum = dbThresholds.first()
+
+        // layout
+        chart.minOffset = 3f
+        chart.extraTopOffset = 6f
+        //chart.offsetLeftAndRight(0)
+        //chart.setViewPortOffsets(3f, 50f, 3f, 10f)
+
+        // dark mode
+        chart.xAxis.textColor = Color.WHITE
+        chart.axisLeft.textColor = Color.WHITE
+        chart.setBackgroundColor(Color.BLACK)
     }
 
     fun updateChart(data: List<Value>) {
@@ -169,40 +217,6 @@ class UiHandler(
         val lineData = LineData(dataSet)
         chart.data = lineData
 
-        chart.isScaleXEnabled = false
-        chart.isScaleYEnabled = false
-        chart.setPinchZoom(false)
-
-        val xAxis = chart.xAxis
-        xAxis.enableGridDashedLine(10f, 10f, 0f)
-
-        // disable dual axis (only use LEFT axis)
-        chart.axisLeft.setDrawLabels(false)
-        chart.axisLeft.setDrawGridLines(false)
-        chart.axisRight.setDrawLabels(false)
-        chart.axisRight.setDrawGridLines(true)
-
-        val yAxis = chart.axisLeft
-        yAxis.axisMaximum = dbThresholds.last()
-        yAxis.axisMinimum = dbThresholds.first()
-
-        // dark mode
-        // https://github.com/PhilJay/MPAndroidChart/issues/5015
-        xAxis.textColor = Color.WHITE
-        yAxis.textColor = Color.WHITE
-        chart.setBackgroundColor(Color.BLACK)
-
-        chart.description.isEnabled = false
-        chart.legend.isEnabled = false
-
-        chart.minOffset = 3f
-        chart.extraTopOffset = 6f
-        //chart.offsetLeftAndRight(0)
-        //chart.setViewPortOffsets(3f, 50f, 3f, 10f)
-        chart.isDragEnabled = false
-        chart.isDoubleTapToZoomEnabled = false
-        chart.isHighlightPerDragEnabled = false
-        chart.isHighlightPerTapEnabled = false
         chart.invalidate()
     }
 
@@ -230,6 +244,7 @@ class UiHandler(
                 "Amp: $amplitude, AmpdBu: $effectiveAmplitudeDbu, nSamples: $nSamples, ${context.showMilliseconds}"
             amplitudeTextView.text = outText
             dbShiftNum.setText(context.dbShift.round(1).toString())
+            dbTargetNum.setText(context.dbTarget.round(1).toString())
         }
     }
 

@@ -20,13 +20,22 @@ class MainActivity : ComponentActivity() {
     lateinit var uiHandler: UiHandler
     val handler = Handler(Looper.getMainLooper())
 
-    private var _dbShift: Float = -70f
+    private var _dbShift: Float = 0f
     var dbShift: Float
         get() = _dbShift
         set(value) {
             _dbShift = value
             val editor = preferences.edit()
             editor.putFloat("dbShift", value)
+            editor.apply()
+        }
+    private var _dbTarget: Float = 0f
+    var dbTarget: Float
+        get() = _dbTarget
+        set(value) {
+            _dbTarget = value
+            val editor = preferences.edit()
+            editor.putFloat("dbTarget", value)
             editor.apply()
         }
 
@@ -55,5 +64,6 @@ class MainActivity : ComponentActivity() {
     private fun initSharedPrefs() {
         preferences = this.getSharedPreferences("com.example.audio_meter", Context.MODE_PRIVATE)
         dbShift = preferences.getFloat("dbShift", -70f)
+        dbTarget = preferences.getFloat("dbTarget", 10f)
     }
 }
