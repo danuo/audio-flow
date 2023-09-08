@@ -61,16 +61,19 @@ abstract class ValueDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: ValueDatabase? = null
 
-        fun getDatabase(context: Context): ValueDatabase {
+        fun getDatabase(): ValueDatabase? {
+            return INSTANCE
+        }
+
+        fun loadDatabase(context: Context) {
             // if the INSTANCE is not null, then return it, else create the database
-            return INSTANCE ?: synchronized(this) {
+            INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     ValueDatabase::class.java,
                     "value_database"
                 ).build()
                 INSTANCE = instance
-                return instance
             }
         }
     }
@@ -143,8 +146,9 @@ class DatabaseHandler(
     private val context: MainActivity,
     private val uiHandler: UiHandler,
 ) {
-    private val database = ValueDatabase.getDatabase(context)
-    private val repository = ValueRepository(database.valueDao())
+
+    private val database = ValueDatabase.getDatabase()
+    private val repository = ValueRepository(database!!.valueDao())
     private val factory = ValueViewModelFactory(repository)
     private val viewModel =
         ViewModelProvider(context, factory).get(modelClass = ValueViewModel::class.java)
@@ -174,6 +178,7 @@ class DatabaseHandler(
                 newestData = data
                 if (data.isNotEmpty()) {
                     uiHandler.updateChart(data)
+                    // send to server
                 }
                 if (System.currentTimeMillis() - initTime > 1000 * 10) {
                     renewDataQuery()

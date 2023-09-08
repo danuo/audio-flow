@@ -103,7 +103,8 @@ class AudioRecorder(
     }
 
     private fun calculateMaxAmplitude(audioBuffer: ShortArray): Int {
-        return audioBuffer.maxOf { abs(it.toInt()) }
+        // return audioBuffer.maxOf { abs(it.toInt()) }
+        return audioBuffer.max().toInt()
     }
 
     private fun processAmplitude(amplitude: Int) {

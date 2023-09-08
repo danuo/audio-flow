@@ -66,7 +66,7 @@ class UiHandler(
             optionsLayoutVisible = !optionsLayoutVisible
             applyVisibility()
         }
-        buttonHeight = toggleOptionsButton.height.toInt()
+        buttonHeight = toggleOptionsButton.height
         val toggleDebugButton: Button = context.findViewById(R.id.toggleDebugButton)
         toggleDebugButton.setOnClickListener {
             debugLayoutVisible = !debugLayoutVisible
@@ -94,11 +94,10 @@ class UiHandler(
 
     private fun initOptionButtons() {
         val timeSelector = context.findViewById<LinearLayout>(R.id.timeSelector)
-        val targetSelector = context.findViewById<LinearLayout>(R.id.dbTargetSelector)
         val dbShiftSelectorLayout = context.findViewById<LinearLayout>(R.id.dbShiftSelector)
         val dbTargetSelectorLayout = context.findViewById<LinearLayout>(R.id.dbTargetSelector)
         val editTextDbShift = dbShiftSelectorLayout.getChildAt(0)
-        val editTextDbTarget = targetSelector.getChildAt(0)
+        val editTextDbTarget = dbTargetSelectorLayout.getChildAt(0)
         val valuesTimeButtons =
             listOf<Long>(6 * 3600 * 1000, 3 * 3600 * 1000, 3600 * 1000, 1800 * 1000, 600 * 1000)
         val textTimeButtons = listOf<String>("6h", "3h", "1h", "30m", "10m")

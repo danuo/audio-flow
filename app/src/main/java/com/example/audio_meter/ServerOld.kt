@@ -9,7 +9,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import android.content.Context
 
-class Server(private val context: MainActivity, private val databaseHandler: DatabaseHandler) {
+class ServerOld(private val context: MainActivity, private val databaseHandler: DatabaseHandler) {
     private val gson = Gson()
     private val htmlResourceId = R.raw.index
     private val htmlString =

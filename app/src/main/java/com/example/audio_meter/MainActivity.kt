@@ -10,6 +10,8 @@ import androidx.activity.ComponentActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import android.content.Intent
+import android.util.Log
 
 
 class MainActivity : ComponentActivity() {
@@ -42,23 +44,45 @@ class MainActivity : ComponentActivity() {
     var showMilliseconds: Long = 3600 * 1000
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d("main activity", "now")
         super.onCreate(savedInstanceState)
         initSharedPrefs()
         setContentView(R.layout.activity_main)
         audioRecorder = AudioRecorder(this)
         uiHandler = UiHandler(this)
         databaseHandler = DatabaseHandler(context = this, uiHandler = uiHandler)
-        startServer(this, databaseHandler)
+        startServerOld(this, databaseHandler)
+        // startThing()
+    }
+
+    private fun startThing() {
+        val intent = Intent(applicationContext, ServerService::class.java)
+        val htmlString =
+            loadHtmlResourceToString(context = this, R.raw.index).trimIndent()
+        intent.putExtra("html", htmlString)
+        intent.action = "start"
+        startService(intent)
+    }
+
+    private fun stopThing() {
+        val intent = Intent(applicationContext, ServerService::class.java)
+        intent.action = "stop"
+        startService(intent)
     }
 
     companion object {
         const val REFRESH_RATE = 10
     }
 
-    private fun startServer(context: MainActivity, databaseHandler: DatabaseHandler) {
+    private fun startServerOld(context: MainActivity, databaseHandler: DatabaseHandler) {
         CoroutineScope(Dispatchers.IO).launch {
-            Server(context, databaseHandler)
+            ServerOld(context, databaseHandler)
         }
+    }
+
+    private fun loadHtmlResourceToString(context: Context, resourceId: Int): String {
+        val inputStream = context.resources.openRawResource(resourceId)
+        return inputStream.readBytes().toString(Charsets.UTF_8)
     }
 
     private fun initSharedPrefs() {
