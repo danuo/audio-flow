@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
-import io.ktor.server.netty.*
+import io.ktor.server.jetty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import android.content.Context
@@ -21,7 +21,7 @@ class ServerOld(private val context: MainActivity, private val databaseHandler: 
     }
 
     private fun startServer() {
-        embeddedServer(Netty, port = 4444) {
+        embeddedServer(Jetty, port = 4444) {
             extracted()
         }.start(wait = true)
     }

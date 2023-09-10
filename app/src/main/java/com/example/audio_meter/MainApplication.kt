@@ -6,10 +6,12 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
-import android.util.Log
 
 class MainApplication : Application() {
     private lateinit var preferences: SharedPreferences
+
+    var wifiOn = false
+    var recordingOn = false
 
 
     private var _dbShift: Float = 0f

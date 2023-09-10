@@ -5,7 +5,7 @@ import com.google.gson.Gson
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
-import io.ktor.server.netty.*
+import io.ktor.server.jetty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.Runnable
@@ -17,7 +17,7 @@ class ServerRunner(private val htmlString: String) : Runnable {
     private val application: MainApplication = MainApplication.getInstance()
     private val gson = Gson()
     private var repository: ValueRepository? = null
-    private var server: NettyApplicationEngine? = null
+    private var server: JettyApplicationEngine? = null
 
     private fun Application.extracted() {
         routing {
@@ -40,14 +40,15 @@ class ServerRunner(private val htmlString: String) : Runnable {
             repository = ValueRepository(database.valueDao())
             Log.d("servernew", "this worked here, database is not null")
         }
-        server = embeddedServer(Netty, port = 4444) {
+        server = embeddedServer(Jetty, port = 4444) {
             extracted()
-        }.start(wait = true)
-        Log.d("servernew", "end reached, Thread will stop")
+        }
+        server?.start(wait = true)
+        Log.d("ServerRunner", "end reached, Thread will stop")
     }
 
     fun stopServer() {
-        server?.stop()
+        server?.stop(100, 100)
     }
 
     private fun getDataFromDatabase(): Map<String, List<Any>> {

@@ -1,7 +1,6 @@
 package com.example.audio_meter
 
 import android.content.Context
-import android.content.SharedPreferences
 
 import android.Manifest
 import android.os.Bundle
@@ -49,6 +48,12 @@ class MainActivity : ComponentActivity() {
             loadHtmlResourceToString(context = this, R.raw.index).trimIndent()
         intent.putExtra("html", htmlString)
         intent.action = "start"
+        startService(intent)
+    }
+
+    fun updateThing() {
+        val intent = Intent(applicationContext, ServerService::class.java)
+        intent.action = "refresh"
         startService(intent)
     }
 

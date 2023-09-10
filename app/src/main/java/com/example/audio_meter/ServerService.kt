@@ -9,7 +9,8 @@ import android.os.Build
 import android.util.Log
 
 class ServerService : Service() {
-    private var runnable: ServerRunner? = null
+    private val application: MainApplication = MainApplication.getInstance()
+    private var serverRunnable: ServerRunner? = null
     private var serverThread: Thread? = null
     private var htmlString: String = ""
 
@@ -29,13 +30,19 @@ class ServerService : Service() {
             }
         }
         when (intent?.action) {
-            "start" -> start()
+            "start" -> initService()
+            "refresh" -> startSubServices()
             "stop" -> stopSelf()
         }
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private fun start() {
+    override fun onDestroy() {
+        super.onDestroy()
+        stopWifi()
+    }
+
+    private fun initService() {
         val notification = NotificationCompat.Builder(this, "server_channel")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle("Server Running")
@@ -50,19 +57,34 @@ class ServerService : Service() {
         } else {
             startForeground(1, notification)
         }
-        startForeground(1, notification)
-        if (runnable == null) {
-            runnable = ServerRunner(htmlString)
-            serverThread = Thread(runnable)
-            serverThread?.start()
-        }
-        Log.d("in service", "and also here to start")
+        startSubServices()  // does nothing if wifiOn = false
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        runnable?.stopServer()
-        serverThread?.interrupt()
-        Log.d("in service", "and also here to start")
+    private fun startSubServices() {
+        Log.d("ServerService", "executing startSubServices")
+        if (application.wifiOn) {
+            Log.d("ServerService", "executing startSubServices, startWifi")
+            startWifi()
+        } else {
+            Log.d("ServerService", "executing startSubServices, stopWifi")
+            stopWifi()
+        }
+    }
+
+    private fun startWifi() {
+        if (serverThread == null) {
+            serverRunnable = ServerRunner(htmlString)
+            serverThread = Thread(serverRunnable)
+            serverThread?.start()
+        }
+    }
+
+    private fun stopWifi() {
+        serverRunnable?.stopServer()
+//        serverThread?.interrupt()
+        serverThread?.join()
+        serverRunnable = null
+        serverThread = null
+        Log.d("ServerService", "old thread finished, everything nulled")
     }
 }

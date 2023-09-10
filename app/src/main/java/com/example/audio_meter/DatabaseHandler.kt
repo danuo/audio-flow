@@ -181,7 +181,7 @@ class DatabaseHandler(
             viewModel.getValuesNewerThan(timeStamp).collect() { data ->
                 newestData = data
                 if (data.isNotEmpty()) {
-                    uiHandler.updateChart(data)
+                    uiHandler.uiChart.updateChart(data)
                     // send to server
                 }
                 if (System.currentTimeMillis() - initTime > 1000 * 10) {

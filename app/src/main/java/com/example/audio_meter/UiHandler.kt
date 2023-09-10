@@ -73,6 +73,18 @@ class UiHandler(
         generateDataButton.setOnClickListener {
             generateData()
         }
+        val startWifiButton = context.findViewById<Button>(R.id.startWifi)
+        startWifiButton.setOnClickListener {
+            if (application.wifiOn) {
+                application.wifiOn = false
+                startWifiButton.text = "Start Wifi"
+                context.updateThing()
+            } else {
+                application.wifiOn = true
+                startWifiButton.text = "Stop Wifi"
+                context.updateThing()
+            }
+        }
         val startRecordButton = context.findViewById<Button>(R.id.startButton)
         startRecordButton.setOnClickListener {
             context.audioRecorder.toggleRecording()
