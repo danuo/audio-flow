@@ -18,38 +18,16 @@ import androidx.core.app.ActivityCompat
 
 
 class MainActivity : ComponentActivity() {
-    private lateinit var preferences: SharedPreferences
 
     lateinit var audioRecorder: AudioRecorder
     lateinit var databaseHandler: DatabaseHandler
     lateinit var uiHandler: UiHandler
     val handler = Handler(Looper.getMainLooper())
 
-    private var _dbShift: Float = 0f
-    var dbShift: Float
-        get() = _dbShift
-        set(value) {
-            _dbShift = value
-            val editor = preferences.edit()
-            editor.putFloat("dbShift", value)
-            editor.apply()
-        }
-    private var _dbTarget: Float = 0f
-    var dbTarget: Float
-        get() = _dbTarget
-        set(value) {
-            _dbTarget = value
-            val editor = preferences.edit()
-            editor.putFloat("dbTarget", value)
-            editor.apply()
-        }
-
-    var showMilliseconds: Long = 3600 * 1000
-
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d("main activity", "now")
         super.onCreate(savedInstanceState)
-        initSharedPrefs()
+
         setContentView(R.layout.activity_main)
         audioRecorder = AudioRecorder(this)
         uiHandler = UiHandler(this)
@@ -93,11 +71,5 @@ class MainActivity : ComponentActivity() {
     private fun loadHtmlResourceToString(context: Context, resourceId: Int): String {
         val inputStream = context.resources.openRawResource(resourceId)
         return inputStream.readBytes().toString(Charsets.UTF_8)
-    }
-
-    private fun initSharedPrefs() {
-        preferences = this.getSharedPreferences("com.example.audio_meter", Context.MODE_PRIVATE)
-        dbShift = preferences.getFloat("dbShift", -70f)
-        dbTarget = preferences.getFloat("dbTarget", 10f)
     }
 }

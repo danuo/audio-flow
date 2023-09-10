@@ -150,7 +150,7 @@ class DatabaseHandler(
     private val context: MainActivity,
     private val uiHandler: UiHandler,
 ) {
-
+    private val application: MainApplication = MainApplication.getInstance()
     private val database = ValueDatabase.getDatabase()
     private val repository = ValueRepository(database!!.valueDao())
     private val factory = ValueViewModelFactory(repository)
@@ -175,7 +175,7 @@ class DatabaseHandler(
 
     fun renewDataQuery() {
         val initTime = System.currentTimeMillis()
-        val timeStamp = initTime - context.showMilliseconds
+        val timeStamp = initTime - application.showMilliseconds
         job?.cancel()
         job = context.lifecycleScope.launch {
             viewModel.getValuesNewerThan(timeStamp).collect() { data ->

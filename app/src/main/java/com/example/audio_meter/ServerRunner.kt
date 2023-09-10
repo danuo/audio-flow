@@ -14,10 +14,10 @@ import kotlinx.coroutines.runBlocking
 
 
 class ServerRunner(private val htmlString: String) : Runnable {
-
-    private var repository: ValueRepository? = null
-
+    private val application: MainApplication = MainApplication.getInstance()
     private val gson = Gson()
+    private var repository: ValueRepository? = null
+    private var server: NettyApplicationEngine? = null
 
     private fun Application.extracted() {
         routing {
@@ -40,23 +40,25 @@ class ServerRunner(private val htmlString: String) : Runnable {
             repository = ValueRepository(database.valueDao())
             Log.d("servernew", "this worked here, database is not null")
         }
-        embeddedServer(Netty, port = 4444) {
+        server = embeddedServer(Netty, port = 4444) {
             extracted()
         }.start(wait = true)
-        Log.d("servernew", "do we ever reach here")
+        Log.d("servernew", "end reached, Thread will stop")
+    }
+
+    fun stopServer() {
+        server?.stop()
     }
 
     private fun getDataFromDatabase(): Map<String, List<Any>> {
-        // val timeStamp = initTime - context.showMilliseconds
-        val timeStamp = System.currentTimeMillis() - 1000 * 60 * 30  // 30 min
+        val timeStamp = System.currentTimeMillis() - application.showMilliseconds
         var dataList = listOf<Value>()
         return runBlocking {
             repository?.let {
                 dataList = repository!!.getValuesNewerThan(timeStamp).first()
             }
             return@runBlocking mapOf<String, List<Any>>("time" to dataList.map { it.time },
-                "values" to dataList.map { it.value })
-            //"values" to data.map { it.value + context.dbShift })
+                "values" to dataList.map { it.value + application.dbShift })
         }
     }
 }

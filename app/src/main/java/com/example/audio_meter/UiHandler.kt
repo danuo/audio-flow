@@ -32,7 +32,7 @@ const val DB_STEP = -1
 class UiHandler(
     private val context: MainActivity,
 ) {
-
+    private val application: MainApplication = MainApplication.getInstance()
     private val amplitudeTextView: TextView = context.findViewById(R.id.amplitudeText)
     private val dbShiftNum: EditText = context.findViewById(R.id.dbShiftNum)
     private val dbTargetNum: EditText = context.findViewById(R.id.dbTargetNum)
@@ -118,7 +118,7 @@ class UiHandler(
             // button.textSize = 10f
             button.layoutParams = layoutParams
             button.setOnClickListener {
-                context.showMilliseconds = valuesTimeButtons[i]
+                application.showMilliseconds = valuesTimeButtons[i]
                 context.databaseHandler.renewDataQuery()
                 updateText()
             }
@@ -134,7 +134,7 @@ class UiHandler(
                 button.text = textsDbButtons[i]
                 button.layoutParams = layoutParams
                 button.setOnClickListener {
-                    context.dbShift += valuesDbButtons[i]
+                    application.dbShift += valuesDbButtons[i]
                     updateText()
                 }
                 dbShiftSelectorLayout.addView(button)
@@ -144,7 +144,7 @@ class UiHandler(
                 button.text = textsDbButtons[i]
                 button.layoutParams = layoutParams
                 button.setOnClickListener {
-                    context.dbTarget += valuesDbButtons[i]
+                    application.dbTarget += valuesDbButtons[i]
                     updateText()
                 }
                 dbTargetSelectorLayout.addView(button)
@@ -207,7 +207,7 @@ class UiHandler(
             LineDataSet(data.map {
                 Entry(
                     (it.time - TIME_SHIFT).toFloat(),
-                    it.value + context.dbShift
+                    it.value + application.dbShift
                 )
             }, "Temperature")
         dataSet.setDrawCircles(false)
@@ -226,7 +226,7 @@ class UiHandler(
         }
         if (data.containsKey("amplitudeDbu")) {
             amplitudeDbu = data["amplitudeDbu"]!!.toFloat()
-            effectiveAmplitudeDbu = (amplitudeDbu + context.dbShift).round(1)
+            effectiveAmplitudeDbu = (amplitudeDbu + application.dbShift).round(1)
             // effectiveAmplitudeDbu = amplitudeDbu + context.dbShift
         }
         if (data.containsKey("nSamples")) {
@@ -240,10 +240,10 @@ class UiHandler(
     private fun updateText() {
         context.handler.post {
             val outText =
-                "Amp: $amplitude, AmpdBu: $effectiveAmplitudeDbu, nSamples: $nSamples, ${context.showMilliseconds}"
+                "Amp: $amplitude, AmpdBu: $effectiveAmplitudeDbu, nSamples: $nSamples, ${application.showMilliseconds}"
             amplitudeTextView.text = outText
-            dbShiftNum.setText(context.dbShift.round(1).toString())
-            dbTargetNum.setText(context.dbTarget.round(1).toString())
+            dbShiftNum.setText(application.dbShift.round(1).toString())
+            dbTargetNum.setText(application.dbTarget.round(1).toString())
         }
     }
 
@@ -363,7 +363,7 @@ class UiHandler(
         repeat(30) {
             val time =
                 System.currentTimeMillis() - random.nextInt(1000 * 3600 * 10)  // from last 10 hours
-            val value = random.nextFloat() * 25 - 10 - context.dbShift
+            val value = random.nextFloat() * 25 - 10 - application.dbShift
             context.databaseHandler.insertData(time, value)
         }
     }

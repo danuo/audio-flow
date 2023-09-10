@@ -9,8 +9,9 @@ import android.os.Build
 import android.util.Log
 
 class ServerService : Service() {
+    private var runnable: ServerRunner? = null
     private var serverThread: Thread? = null
-    var htmlString: String = ""
+    private var htmlString: String = ""
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -50,20 +51,18 @@ class ServerService : Service() {
             startForeground(1, notification)
         }
         startForeground(1, notification)
-        serverThread = Thread(ServerRunner(htmlString))
-        serverThread?.start()
+        if (runnable == null) {
+            runnable = ServerRunner(htmlString)
+            serverThread = Thread(runnable)
+            serverThread?.start()
+        }
         Log.d("in service", "and also here to start")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (serverThread is Thread) {
-            serverThread?.interrupt()
-            try {
-                serverThread?.join()
-            } catch (e: InterruptedException) {
-                Log.d("serverservice", e.toString())
-            }
-        }
+        runnable?.stopServer()
+        serverThread?.interrupt()
+        Log.d("in service", "and also here to start")
     }
 }
