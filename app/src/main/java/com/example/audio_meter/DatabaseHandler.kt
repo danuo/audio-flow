@@ -85,6 +85,10 @@ class ValueRepository(private val valueDao: ValueDao) {
         return valueDao.getDataCount()
     }
 
+    fun getValuesAll(): List<Value> {
+        return valueDao.getValuesAll()
+    }
+
     fun getValuesNewerThan(timeStamp: Long): Flow<List<Value>> {
         return valueDao.getValuesNewerThan(timeStamp)
     }

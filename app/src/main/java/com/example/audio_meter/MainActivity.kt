@@ -3,6 +3,7 @@ package com.example.audio_meter
 import android.content.Context
 import android.content.SharedPreferences
 
+import android.Manifest
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -11,7 +12,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import android.content.Intent
+import android.os.Build
 import android.util.Log
+import androidx.core.app.ActivityCompat
 
 
 class MainActivity : ComponentActivity() {
@@ -51,11 +54,18 @@ class MainActivity : ComponentActivity() {
         audioRecorder = AudioRecorder(this)
         uiHandler = UiHandler(this)
         databaseHandler = DatabaseHandler(context = this, uiHandler = uiHandler)
-        startServerOld(this, databaseHandler)
-        // startThing()
+        // startServerOld(this, databaseHandler)
+        startThing()
     }
 
     private fun startThing() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                0
+            )
+        }
         val intent = Intent(applicationContext, ServerService::class.java)
         val htmlString =
             loadHtmlResourceToString(context = this, R.raw.index).trimIndent()
