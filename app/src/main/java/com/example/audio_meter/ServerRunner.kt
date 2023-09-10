@@ -9,7 +9,7 @@ import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
 
@@ -51,13 +51,9 @@ class ServerRunner(private val htmlString: String) : Runnable {
         val timeStamp = System.currentTimeMillis() - 1000 * 60 * 30  // 30 min
         var dataList = listOf<Value>()
         return runBlocking {
-            if (repository is ValueRepository) {
-                Log.d("servernew", "this worked here, repository is not null")
-                dataList = repository!!.getValuesAll()
-                Log.d("servernew", dataList.size.toString())
-                Log.d("servernew", dataList.toString())
+            repository?.let {
+                dataList = repository!!.getValuesNewerThan(timeStamp).first()
             }
-
             return@runBlocking mapOf<String, List<Any>>("time" to dataList.map { it.time },
                 "values" to dataList.map { it.value })
             //"values" to data.map { it.value + context.dbShift })

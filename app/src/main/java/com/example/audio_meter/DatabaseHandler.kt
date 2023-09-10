@@ -35,7 +35,7 @@ interface ValueDao {
     fun getDataCount(): Flow<Int>
 
     @Query("SELECT * FROM data_table ORDER BY time ASC")
-    fun getValuesAll(): List<Value>
+    fun getValuesAll(): Flow<List<Value>>
 
     @Query("SELECT * FROM data_table WHERE time > :timeStamp ORDER BY time ASC")
     fun getValuesNewerThan(timeStamp: Long): Flow<List<Value>>
@@ -85,7 +85,7 @@ class ValueRepository(private val valueDao: ValueDao) {
         return valueDao.getDataCount()
     }
 
-    fun getValuesAll(): List<Value> {
+    fun getValuesAll(): Flow<List<Value>> {
         return valueDao.getValuesAll()
     }
 
