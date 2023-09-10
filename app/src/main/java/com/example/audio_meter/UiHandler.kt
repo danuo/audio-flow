@@ -7,14 +7,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
-import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import java.util.Date
 import java.util.Random
-import java.text.SimpleDateFormat
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
@@ -36,7 +29,6 @@ class UiHandler(
     private val amplitudeTextView: TextView = context.findViewById(R.id.amplitudeText)
     private val dbShiftNum: EditText = context.findViewById(R.id.dbShiftNum)
     private val dbTargetNum: EditText = context.findViewById(R.id.dbTargetNum)
-    private val chart: LineChart = context.findViewById(R.id.lineChart)
     private val audioMeterLayout: LinearLayout = context.findViewById((R.id.audioMeterLayout))
     private var amplitude: Int = 1
     private var amplitudeDbu: Float = -50f
@@ -49,6 +41,7 @@ class UiHandler(
     private val debugLayout: LinearLayout
     private var optionsLayoutVisible = false
     private var debugLayoutVisible = false
+    var uiChart: UiChart
 
     private val buttonHeight: Int
 
@@ -56,7 +49,7 @@ class UiHandler(
         dbThresholds = getDbThresholds()
         drawables = generateDrawables()
         initLeds()
-        initChart()
+        uiChart = UiChart(context.findViewById(R.id.lineChart), dbThresholds)
         debugLayout = context.findViewById(R.id.debugLayout)
         optionsLayout = context.findViewById(R.id.optionsLayout)
         applyVisibility()
@@ -165,58 +158,6 @@ class UiHandler(
         } else {
             optionsLayout.visibility = View.GONE
         }
-    }
-
-    private fun initChart() {
-        chart.xAxis.valueFormatter = LineChartXAxisValueFormatter()
-        chart.xAxis.enableGridDashedLine(10f, 10f, 0f)
-
-        chart.isScaleXEnabled = false
-        chart.isScaleYEnabled = false
-        chart.setPinchZoom(false)
-
-        chart.isDragEnabled = false
-        chart.isDoubleTapToZoomEnabled = false
-        chart.isHighlightPerDragEnabled = false
-        chart.isHighlightPerTapEnabled = false
-
-        chart.axisLeft.setDrawLabels(false)
-        chart.axisLeft.setDrawGridLines(false)
-        chart.axisRight.setDrawLabels(false)
-        chart.axisRight.setDrawGridLines(true)
-        chart.description.isEnabled = false
-        chart.legend.isEnabled = false
-
-        chart.axisLeft.axisMaximum = dbThresholds.last()
-        chart.axisLeft.axisMinimum = dbThresholds.first()
-
-        // layout
-        chart.minOffset = 3f
-        chart.extraTopOffset = 6f
-        //chart.offsetLeftAndRight(0)
-        //chart.setViewPortOffsets(3f, 50f, 3f, 10f)
-
-        // dark mode
-        chart.xAxis.textColor = Color.WHITE
-        chart.axisLeft.textColor = Color.WHITE
-        chart.setBackgroundColor(Color.BLACK)
-    }
-
-    fun updateChart(data: List<Value>) {
-        val dataSet =
-            LineDataSet(data.map {
-                Entry(
-                    (it.time - TIME_SHIFT).toFloat(),
-                    it.value + application.dbShift
-                )
-            }, "Temperature")
-        dataSet.setDrawCircles(false)
-        dataSet.setDrawValues(false)
-        dataSet.color = 0xFFFF0000.toInt()
-        val lineData = LineData(dataSet)
-        chart.data = lineData
-
-        chart.invalidate()
     }
 
 
@@ -366,17 +307,6 @@ class UiHandler(
             val value = random.nextFloat() * 25 - 10 - application.dbShift
             context.databaseHandler.insertData(time, value)
         }
-    }
-}
-
-
-class LineChartXAxisValueFormatter : IndexAxisValueFormatter() {
-    @SuppressLint("SimpleDateFormat")
-    override fun getFormattedValue(value: Float): String {
-        val emissionsMilliSince1970Time = value.toLong() + TIME_SHIFT
-        val timeMilliseconds = Date(emissionsMilliSince1970Time)
-        val dateFormat = SimpleDateFormat("HH:mm")
-        return dateFormat.format(timeMilliseconds)
     }
 }
 
