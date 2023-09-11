@@ -9,10 +9,12 @@ import android.os.Build
 import android.util.Log
 
 class ServerService : Service() {
+    private lateinit var audioRecorder: AudioRecorder
     private val application: MainApplication = MainApplication.getInstance()
     private var serverRunnable: ServerRunner? = null
     private var serverThread: Thread? = null
     private var htmlString: String = ""
+
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -20,6 +22,7 @@ class ServerService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        audioRecorder = AudioRecorder(this)
         Log.d("in service", "we made it here to oncreate")
     }
 
@@ -68,6 +71,9 @@ class ServerService : Service() {
         } else {
             Log.d("ServerService", "executing startSubServices, stopWifi")
             stopWifi()
+        }
+        if (application.recordingOn) {
+            audioRecorder.startRecordingThread()
         }
     }
 

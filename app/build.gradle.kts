@@ -109,4 +109,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("io.ktor:ktor-server-core-jvm:2.3.4")
     implementation("io.ktor:ktor-server-jetty-jvm:2.3.4")
+
+    // Intent Communication
+    implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.0.0")
 }

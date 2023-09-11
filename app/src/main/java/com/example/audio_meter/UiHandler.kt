@@ -2,6 +2,7 @@ package com.example.audio_meter
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+
 import android.content.res.Resources
 import android.view.View
 import android.widget.Button
@@ -45,6 +46,7 @@ class UiHandler(
 
     private val buttonHeight: Int
 
+
     init {
         dbThresholds = getDbThresholds()
         drawables = generateDrawables()
@@ -87,10 +89,10 @@ class UiHandler(
         }
         val startRecordButton = context.findViewById<Button>(R.id.startButton)
         startRecordButton.setOnClickListener {
-            context.audioRecorder.toggleRecording()
-            if (context.audioRecorder.isRecording) {
+            application.recordingOn = !application.recordingOn
+            if (application.recordingOn) {
+                context.updateThing()
                 startRecordButton.text = "Stop Recording"
-                context.audioRecorder.readAudioData()
             } else {
                 startRecordButton.text = "Start Recording"
             }

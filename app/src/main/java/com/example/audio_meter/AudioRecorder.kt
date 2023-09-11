@@ -1,12 +1,14 @@
 package com.example.audio_meter
 
 import android.Manifest
+import android.app.Service
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlin.math.abs
 import kotlin.math.log10
 import kotlin.math.pow
@@ -14,37 +16,23 @@ import kotlin.math.sqrt
 
 
 class AudioRecorder(
-    private val context: MainActivity
+    private val context: Service
 ) {
-    var isRecording = false
+    private val application: MainApplication = MainApplication.getInstance()
+
+    //    var isRecording = false
     private var audioRecord: AudioRecord? = null
 
     private val nGroup: Int = 30  // every 3 seconds
     private var counter: Int = 0
     private var valSquareSum: Double = 0.0
 
-    init {
-        if (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.RECORD_AUDIO
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            initAudio()
-        } else {
-            val requestPermissionLauncher =
-                context.registerForActivityResult(
-                    ActivityResultContracts.RequestPermission()
-                ) { isGranted: Boolean ->
-                    if (isGranted) {
-                        initAudio()
-                    }
-                }
+    private val databaseAudio: AudioDatabaseThing = AudioDatabaseThing()
 
-            requestPermissionLauncher.launch(
-                Manifest.permission.RECORD_AUDIO
-            )
-        }
+    init {
+        initAudio()
     }
+
 
     private fun initAudio() {
         val minBufferSize = AudioRecord.getMinBufferSize(
@@ -79,26 +67,19 @@ class AudioRecorder(
         return 20 * log10(0.00001 + rms.toDouble()).toFloat()
     }
 
-    fun toggleRecording() {
-        if (isRecording) {
-            audioRecord?.stop()
-            isRecording = false
-        } else {
-            if (audioRecord is AudioRecord) {
-                audioRecord?.startRecording()
-                isRecording = true
-            }
-        }
-    }
 
-    fun readAudioData() {
+    fun startRecordingThread() {
         Thread {
+            if (application.recordingOn) {
+                audioRecord?.startRecording()
+            }
             val audioBuffer = ShortArray(BUFFER_SIZE)
-            while (this.isRecording) {
+            while (application.recordingOn) {
                 audioRecord?.read(audioBuffer, 0, BUFFER_SIZE)
                 val maxAmplitude = calculateMaxAmplitude(audioBuffer)
                 processAmplitude(maxAmplitude)
             }
+            audioRecord?.stop()
         }.start()
     }
 
@@ -109,13 +90,21 @@ class AudioRecorder(
 
     private fun processAmplitude(amplitude: Int) {
         val amplitudeDbu = valToDbu(amplitude.toFloat())
-        context.uiHandler.updateUI(
-            mapOf(
-                "amplitude" to amplitude,
-                "amplitudeDbu" to amplitudeDbu.toInt()
-            )
-        )
+//        context.uiHandler.updateUI(
+//            mapOf(
+//                "amplitude" to amplitude,
+//                "amplitudeDbu" to amplitudeDbu.toInt()
+//            )
+//        )
+        sendNotification(amplitude, amplitudeDbu.toInt())
         poolData(amplitude)
+    }
+
+    private fun sendNotification(amplitude: Int, amplitudeDbu: Int) {
+        val intent = Intent("customtextforme")
+        intent.putExtra("amplitude", amplitude)
+        intent.putExtra("amplitudeDbu", amplitudeDbu)
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
     }
 
     private fun poolData(amplitude: Int) {
@@ -126,10 +115,20 @@ class AudioRecorder(
             val valRMS = sqrt(valSquareAvg).toFloat()
             val valRMSdB = valToDbu(valRMS)
             val time: Long = System.currentTimeMillis()
-            context.databaseHandler.insertData(time, valRMSdB)
+            databaseAudio.insertData(time, valRMSdB)
             valSquareSum = 0.0
             counter = 0
         }
     }
 
+}
+
+class AudioDatabaseThing() {
+    private val database = ValueDatabase.getDatabase()
+    private val repository = ValueRepository(database!!.valueDao())
+    private val viewModel = ValueViewModel(repository)
+
+    fun insertData(time: Long, value: Float) {
+        viewModel.insert(Value(time = time, value = value))
+    }
 }
