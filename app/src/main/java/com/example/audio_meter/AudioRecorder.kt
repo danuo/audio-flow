@@ -19,8 +19,6 @@ class AudioRecorder(
     private val context: Service
 ) {
     private val application: MainApplication = MainApplication.getInstance()
-
-    //    var isRecording = false
     private var audioRecord: AudioRecord? = null
 
     private val nGroup: Int = 30  // every 3 seconds
@@ -28,6 +26,8 @@ class AudioRecorder(
     private var valSquareSum: Double = 0.0
 
     private val databaseAudio: AudioDatabaseThing = AudioDatabaseThing()
+
+    private var recordingThread: Thread? = null
 
     init {
         initAudio()
@@ -69,18 +69,23 @@ class AudioRecorder(
 
 
     fun startRecordingThread() {
-        Thread {
-            if (application.recordingOn) {
-                audioRecord?.startRecording()
+        if (application.recordingOn) {
+            audioRecord?.startRecording()
+        }
+        if (recordingThread?.state == Thread.State.RUNNABLE) {
+            // do nothing
+        } else {
+            recordingThread = Thread {
+                val audioBuffer = ShortArray(BUFFER_SIZE)
+                while (application.recordingOn) {
+                    audioRecord?.read(audioBuffer, 0, BUFFER_SIZE)
+                    val maxAmplitude = calculateMaxAmplitude(audioBuffer)
+                    processAmplitude(maxAmplitude)
+                }
+                audioRecord?.stop()
             }
-            val audioBuffer = ShortArray(BUFFER_SIZE)
-            while (application.recordingOn) {
-                audioRecord?.read(audioBuffer, 0, BUFFER_SIZE)
-                val maxAmplitude = calculateMaxAmplitude(audioBuffer)
-                processAmplitude(maxAmplitude)
-            }
-            audioRecord?.stop()
-        }.start()
+            recordingThread?.start()
+        }
     }
 
     private fun calculateMaxAmplitude(audioBuffer: ShortArray): Int {
@@ -90,12 +95,6 @@ class AudioRecorder(
 
     private fun processAmplitude(amplitude: Int) {
         val amplitudeDbu = valToDbu(amplitude.toFloat())
-//        context.uiHandler.updateUI(
-//            mapOf(
-//                "amplitude" to amplitude,
-//                "amplitudeDbu" to amplitudeDbu.toInt()
-//            )
-//        )
         sendNotification(amplitude, amplitudeDbu.toInt())
         poolData(amplitude)
     }

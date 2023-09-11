@@ -23,7 +23,7 @@ class ServerService : Service() {
     override fun onCreate() {
         super.onCreate()
         audioRecorder = AudioRecorder(this)
-        Log.d("in service", "we made it here to oncreate")
+        Log.d("ServerService", "inside onCreate()")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -33,7 +33,11 @@ class ServerService : Service() {
             }
         }
         when (intent?.action) {
-            "start" -> initService()
+            "start" -> {
+                initService()
+                startSubServices()
+            }
+
             "refresh" -> startSubServices()
             "stop" -> stopSelf()
         }
@@ -42,7 +46,7 @@ class ServerService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        stopWifi()
+        stopWifiServer()
     }
 
     private fun initService() {
@@ -60,24 +64,23 @@ class ServerService : Service() {
         } else {
             startForeground(1, notification)
         }
-        startSubServices()  // does nothing if wifiOn = false
     }
 
     private fun startSubServices() {
         Log.d("ServerService", "executing startSubServices")
         if (application.wifiOn) {
             Log.d("ServerService", "executing startSubServices, startWifi")
-            startWifi()
+            startWifiServer()
         } else {
             Log.d("ServerService", "executing startSubServices, stopWifi")
-            stopWifi()
+            stopWifiServer()
         }
         if (application.recordingOn) {
             audioRecorder.startRecordingThread()
         }
     }
 
-    private fun startWifi() {
+    private fun startWifiServer() {
         if (serverThread == null) {
             serverRunnable = ServerRunner(htmlString)
             serverThread = Thread(serverRunnable)
@@ -85,7 +88,7 @@ class ServerService : Service() {
         }
     }
 
-    private fun stopWifi() {
+    private fun stopWifiServer() {
         serverRunnable?.stopServer()
 //        serverThread?.interrupt()
         serverThread?.join()
