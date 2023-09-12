@@ -90,7 +90,6 @@ class ServerService : Service() {
 
     private fun stopWifiServer() {
         serverRunnable?.stopServer()
-//        serverThread?.interrupt()
         serverThread?.join()
         serverRunnable = null
         serverThread = null

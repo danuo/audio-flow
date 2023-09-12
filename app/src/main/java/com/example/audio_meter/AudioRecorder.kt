@@ -138,9 +138,7 @@ class AudioRecorder(
 }
 
 class AudioDatabaseThing() {
-    private val database = ValueDatabase.getDatabase()
-    private val repository = ValueRepository(database!!.valueDao())
-    private val viewModel = ValueViewModel(repository)
+    private val viewModel = ValueViewModel()
 
     fun insertData(time: Long, maxAmpDbu: Float, rmsAmpDbu: Float) {
         viewModel.insert(Value(time = time, maxAmpDbu = maxAmpDbu, rmsAmpDbu = rmsAmpDbu))

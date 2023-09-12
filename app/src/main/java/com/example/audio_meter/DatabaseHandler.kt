@@ -111,10 +111,11 @@ class ValueRepository(private val valueDao: ValueDao) {
 }
 
 
-class ValueViewModel(
-    private val repository: ValueRepository
-) :
+class ValueViewModel() :
     ViewModel() {
+    private val database = ValueDatabase.getDatabase()
+    private val repository = ValueRepository(database!!.valueDao())
+
     fun getDataCount(): Flow<Int> {
         return repository.getDataCount()
     }
@@ -137,31 +138,17 @@ class ValueViewModel(
 }
 
 
-@Suppress("UNCHECKED_CAST")
-class ValueViewModelFactory(
-    private val repository: ValueRepository
-) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return ValueViewModel(repository) as T
-    }
-}
-
-
 class DatabaseHandler(
     private val context: MainActivity,
     private val uiHandler: UiHandler,
 ) {
     private val application: MainApplication = MainApplication.getInstance()
-    private val database = ValueDatabase.getDatabase()
-    private val repository = ValueRepository(database!!.valueDao())
-    private val factory = ValueViewModelFactory(repository)
     private val viewModel =
-        ViewModelProvider(context, factory).get(modelClass = ValueViewModel::class.java)
-
-    var dataCount: Int = 10
-    var newestData = listOf<Value>()
+        ViewModelProvider(context).get(modelClass = ValueViewModel::class.java)
 
     private var job: Job? = null
+    var dataCount: Int = 10
+    var newestData = listOf<Value>()
 
     init {
         cleanupDatabase()
