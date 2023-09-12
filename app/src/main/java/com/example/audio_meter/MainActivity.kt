@@ -7,9 +7,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.activity.ComponentActivity
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
@@ -130,7 +127,7 @@ class MainActivity : ComponentActivity() {
         intent.action = "stop"
         startService(intent)
     }
-    
+
     private fun loadHtmlResourceToString(context: Context, resourceId: Int): String {
         val inputStream = context.resources.openRawResource(resourceId)
         return inputStream.readBytes().toString(Charsets.UTF_8)

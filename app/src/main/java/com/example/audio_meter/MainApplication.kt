@@ -3,7 +3,6 @@ package com.example.audio_meter
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.Service
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
@@ -13,8 +12,6 @@ class MainApplication : Application() {
 
     var wifiOn = false
     var recordingOn = false
-
-    var serverService: Service? = null
 
 
     private var _dbShift: Float = 0f

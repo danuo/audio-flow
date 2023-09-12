@@ -24,7 +24,7 @@ class AudioRecorder(
 
     private val nGroup: Int = 30  // every 3 seconds
     private var counter: Int = 0
-    private var maxAmpList: List<Double> = listOf<Double>()
+    private var maxAmpList: List<Double> = listOf()
     private var rmsAmpSquareSum: Double = 0.0
     private val databaseAudio: AudioDatabaseThing = AudioDatabaseThing()
     private var recordingThread: Thread? = null
@@ -103,7 +103,7 @@ class AudioRecorder(
         // factor 2 = 6 dB
         // factor 0.5 = -6 dB
         // rms of 32000 = 20 dBu
-        return 20 * log10(0.00001 + rms.toDouble())
+        return 20 * log10(0.00001 + rms)
     }
 
     private fun sendLedData(maxAmplitudeDbu: Double, rmsAmplitudeDbu: Double) {
@@ -130,14 +130,14 @@ class AudioRecorder(
                 maxAmpDbu = maxAmpDbu.toFloat(),
                 rmsAmpDbu = rmsAmpDbu.toFloat()
             )
-            maxAmpList = listOf<Double>()
+            maxAmpList = listOf()
             counter = 0
         }
     }
 
 }
 
-class AudioDatabaseThing() {
+class AudioDatabaseThing {
     private val viewModel = ValueViewModel()
 
     fun insertData(time: Long, maxAmpDbu: Float, rmsAmpDbu: Float) {
