@@ -22,7 +22,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
 class MainActivity : ComponentActivity() {
     private val application: MainApplication = MainApplication.getInstance()
-    lateinit var databaseHandler: DatabaseHandler
+    lateinit var databaseHandler: DataHandler
     lateinit var uiHandler: UiHandler
     val handler = Handler(Looper.getMainLooper())
     var counter = 0
@@ -55,8 +55,7 @@ class MainActivity : ComponentActivity() {
         setContentView(R.layout.activity_main)
 
         uiHandler = UiHandler(this)
-        databaseHandler = DatabaseHandler(context = this, uiHandler = uiHandler)
-        // startServerOld(this, databaseHandler)
+        databaseHandler = DataHandler(context = this, uiHandler = uiHandler)
         getPermissionsNotification()
     }
 
@@ -131,14 +130,7 @@ class MainActivity : ComponentActivity() {
         intent.action = "stop"
         startService(intent)
     }
-
-
-    private fun startServerOld(context: MainActivity, databaseHandler: DatabaseHandler) {
-        CoroutineScope(Dispatchers.IO).launch {
-            ServerOld(context, databaseHandler)
-        }
-    }
-
+    
     private fun loadHtmlResourceToString(context: Context, resourceId: Int): String {
         val inputStream = context.resources.openRawResource(resourceId)
         return inputStream.readBytes().toString(Charsets.UTF_8)
