@@ -50,18 +50,28 @@ class UiChart(private val chart: LineChart, dbThresholds: List<Float>) {
     }
 
     fun updateChart(data: List<Value>) {
-        val dataSet =
+        val maxDataSet =
             LineDataSet(data.map {
                 Entry(
                     (it.time - TIME_SHIFT).toFloat(),
-                    it.value + application.dbShift
+                    it.maxAmpDbu + application.dbShift
                 )
             }, "Temperature")
-        dataSet.setDrawCircles(false)
-        dataSet.setDrawValues(false)
-        dataSet.color = 0xFFFF0000.toInt()
-        val lineData = LineData(dataSet)
-        chart.data = lineData
+        maxDataSet.setDrawCircles(false)
+        maxDataSet.setDrawValues(false)
+        maxDataSet.color = 0xFFFF0000.toInt()
+        val maxLineData = LineData(maxDataSet)
+        val rmsDataSet = LineDataSet(data.map {
+            Entry(
+                (it.time - TIME_SHIFT).toFloat(),
+                it.rmsAmpDbu + application.dbShift
+            )
+        }, "Temperature")
+        rmsDataSet.setDrawCircles(false)
+        rmsDataSet.setDrawValues(false)
+        rmsDataSet.color = 0xFFFF0000.toInt()
+        val rmsLineData = LineData(rmsDataSet)
+        chart.data = maxLineData
 
         chart.invalidate()
     }

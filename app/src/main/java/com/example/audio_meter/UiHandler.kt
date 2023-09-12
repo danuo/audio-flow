@@ -31,9 +31,8 @@ class UiHandler(
     private val dbShiftNum: EditText = context.findViewById(R.id.dbShiftNum)
     private val dbTargetNum: EditText = context.findViewById(R.id.dbTargetNum)
     private val audioMeterLayout: LinearLayout = context.findViewById((R.id.audioMeterLayout))
-    private var amplitude: Int = 1
-    private var amplitudeDbu: Float = -50f
-    private var effectiveAmplitudeDbu: Float = -50f
+    private var maxAmpDbu: Float = 0f
+    private var rmsAmpDbu: Float = 0f
     private var nSamples: Int = 0
 
     private val drawables: Map<String, List<Drawable>>
@@ -69,7 +68,7 @@ class UiHandler(
         }
         val deleteDataButton = context.findViewById<Button>(R.id.deleteDataButton)
         deleteDataButton.setOnClickListener {
-            showConfirmationDialog()
+            showDeleteConfirmationDialog()
         }
         val generateDataButton = context.findViewById<Button>(R.id.generateDataButton)
         generateDataButton.setOnClickListener {
@@ -176,13 +175,11 @@ class UiHandler(
 
 
     fun updateUI(data: Map<String, Int>) {
-        if (data.containsKey("amplitude")) {
-            amplitude = data["amplitude"]!!
+        if (data.containsKey("maxAmplitudeDbu")) {
+            maxAmpDbu = (data["maxAmplitudeDbu"]!! + application.dbShift).round(1)
         }
-        if (data.containsKey("amplitudeDbu")) {
-            amplitudeDbu = data["amplitudeDbu"]!!.toFloat()
-            effectiveAmplitudeDbu = (amplitudeDbu + application.dbShift).round(1)
-            // effectiveAmplitudeDbu = amplitudeDbu + context.dbShift
+        if (data.containsKey("rmsAmplitudeDbu")) {
+            rmsAmpDbu = (data["rmsAmplitudeDbu"]!! + application.dbShift).round(1)
         }
         if (data.containsKey("nSamples")) {
             nSamples = data["nSamples"]!!
@@ -195,14 +192,14 @@ class UiHandler(
     private fun updateText() {
         context.handler.post {
             val outText =
-                "Amp: $amplitude, AmpdBu: $effectiveAmplitudeDbu, nSamples: $nSamples, ${application.showMilliseconds}"
+                "max: $maxAmpDbu, rms: $rmsAmpDbu, nSamples: $nSamples, ${application.showMilliseconds}"
             amplitudeTextView.text = outText
             dbShiftNum.setText(application.dbShift.round(1).toString())
             dbTargetNum.setText(application.dbTarget.round(1).toString())
         }
     }
 
-    private fun showConfirmationDialog() {
+    private fun showDeleteConfirmationDialog() {
         val builder = AlertDialog.Builder(context)
         builder.setMessage("Do you want to delete all data?")
             .setCancelable(false)
@@ -265,15 +262,15 @@ class UiHandler(
             for (index in 0 until N_LEDS) {
                 val thresh = dbThresholds[index]
                 val led = audioMeterLayout.getChildAt(N_LEDS - 1 - index) as View
-                led.background = getDrawable(effectiveAmplitudeDbu, thresh)
+                led.background = getDrawable(maxAmpDbu = maxAmpDbu, thresh = thresh)
             }
         }
     }
 
-    private fun getDrawable(amplitude: Float, thresh: Float): Drawable {
+    private fun getDrawable(maxAmpDbu: Float, thresh: Float): Drawable {
         val redThresh = 12.0f
         val orangeThresh = 8.0f
-        val ledOn = amplitude > thresh
+        val ledOn = maxAmpDbu > thresh
         val key = if (ledOn) {
             "on"
         } else {
@@ -318,8 +315,13 @@ class UiHandler(
         repeat(30) {
             val time =
                 System.currentTimeMillis() - random.nextInt(1000 * 3600 * 10)  // from last 10 hours
-            val value = random.nextFloat() * 25 - 10 - application.dbShift
-            context.databaseHandler.insertData(time, value)
+            val maxAmpDbu = random.nextFloat() * 25 - 10 - application.dbShift
+            val rmsAmpDbu = 0.6f * (random.nextFloat() * 25 - 10) - application.dbShift
+            context.databaseHandler.insertData(
+                time = time,
+                maxAmpDbu = maxAmpDbu,
+                rmsAmpDbu = rmsAmpDbu
+            )
         }
     }
 }

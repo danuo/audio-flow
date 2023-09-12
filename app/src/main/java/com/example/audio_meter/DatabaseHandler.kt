@@ -25,7 +25,8 @@ class Value(
 
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val time: Long,
-    val value: Float
+    val maxAmpDbu: Float,
+    val rmsAmpDbu: Float
 )
 
 
@@ -191,8 +192,8 @@ class DatabaseHandler(
         }
     }
 
-    fun insertData(time: Long, value: Float) {
-        viewModel.insert(Value(time = time, value = value))
+    fun insertData(time: Long, maxAmpDbu: Float, rmsAmpDbu: Float) {
+        viewModel.insert(Value(time = time, maxAmpDbu = maxAmpDbu, rmsAmpDbu = rmsAmpDbu))
     }
 
     fun deleteAll() {

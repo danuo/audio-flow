@@ -44,7 +44,7 @@ class ServerOld(private val context: MainActivity, private val databaseHandler: 
     private fun getDataFromDatabase(): Map<String, List<Any>> {
         val data = databaseHandler.newestData
         return mapOf<String, List<Any>>("time" to data.map { it.time },
-            "values" to data.map { it.value + application.dbShift })
+            "values" to data.map { it.maxAmpDbu + application.dbShift })
     }
 
     private fun loadHtmlResourceToString(context: Context, resourceId: Int): String {

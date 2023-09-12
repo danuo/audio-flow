@@ -24,20 +24,28 @@ class MainActivity : ComponentActivity() {
     lateinit var databaseHandler: DatabaseHandler
     lateinit var uiHandler: UiHandler
     val handler = Handler(Looper.getMainLooper())
+    var counter = 0
 
     private val mMessageReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            val amplitude = intent?.getIntExtra("amplitude", 20)
-            val amplitudeDbu = intent?.getIntExtra("amplitudeDbu", 20)
-            if ((amplitude is Int) and (amplitudeDbu is Int)) {
+            val maxAmplitudeDbu = intent?.getDoubleExtra("maxAmplitudeDbu", 20.0)?.toInt()
+            val rmsAmplitudeDbu = intent?.getDoubleExtra("rmsAmplitudeDbu", 20.0)?.toInt()
+            val threadId = intent?.getLongExtra("threadId", 0)
+            if ((maxAmplitudeDbu is Int) and (rmsAmplitudeDbu is Int)) {
+                counter += 1
+                Log.d("mainactivity", "${maxAmplitudeDbu.toString()} $counter $threadId")
                 uiHandler.updateUI(
                     mapOf(
-                        "amplitude" to amplitude!!,
-                        "amplitudeDbu" to amplitudeDbu!!
+                        "maxAmplitudeDbu" to maxAmplitudeDbu!!,
+                        "rmsAmplitudeDbu" to rmsAmplitudeDbu!!
                     )
                 )
             }
         }
+    }
+
+    companion object {
+        const val REFRESH_RATE = 10
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,8 +63,8 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         LocalBroadcastManager.getInstance(this).registerReceiver(
             mMessageReceiver,
-            IntentFilter("customtextforme")
-        );
+            IntentFilter("ledData")
+        )
     }
 
     override fun onPause() {
@@ -119,9 +127,6 @@ class MainActivity : ComponentActivity() {
         startService(intent)
     }
 
-    companion object {
-        const val REFRESH_RATE = 10
-    }
 
     private fun startServerOld(context: MainActivity, databaseHandler: DatabaseHandler) {
         CoroutineScope(Dispatchers.IO).launch {

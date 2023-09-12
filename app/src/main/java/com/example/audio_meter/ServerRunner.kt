@@ -38,7 +38,7 @@ class ServerRunner(private val htmlString: String) : Runnable {
         val database = ValueDatabase.getDatabase()
         if (database is ValueDatabase) {
             repository = ValueRepository(database.valueDao())
-            Log.d("servernew", "this worked here, database is not null")
+            Log.d("ServerRunner", "this worked here, database is not null")
         }
         server = embeddedServer(Jetty, port = 4444) {
             extracted()
@@ -59,7 +59,7 @@ class ServerRunner(private val htmlString: String) : Runnable {
                 dataList = repository!!.getValuesNewerThan(timeStamp).first()
             }
             return@runBlocking mapOf<String, List<Any>>("time" to dataList.map { it.time },
-                "values" to dataList.map { it.value + application.dbShift })
+                "values" to dataList.map { it.maxAmpDbu + application.dbShift })
         }
     }
 }

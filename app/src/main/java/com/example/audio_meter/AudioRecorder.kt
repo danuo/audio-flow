@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlin.math.abs
@@ -23,10 +24,9 @@ class AudioRecorder(
 
     private val nGroup: Int = 30  // every 3 seconds
     private var counter: Int = 0
-    private var valSquareSum: Double = 0.0
-
+    private var maxAmpList: List<Double> = listOf<Double>()
+    private var rmsAmpSquareSum: Double = 0.0
     private val databaseAudio: AudioDatabaseThing = AudioDatabaseThing()
-
     private var recordingThread: Thread? = null
 
     init {
@@ -60,13 +60,6 @@ class AudioRecorder(
         const val BUFFER_SIZE = (SAMPLE_RATE / MainActivity.REFRESH_RATE)  // before: 1024
     }
 
-    private fun valToDbu(rms: Float): Float {
-        // factor 2 = 6 dB
-        // factor 0.5 = -6 dB
-        // rms of 32000 = 20 dBu
-        return 20 * log10(0.00001 + rms.toDouble()).toFloat()
-    }
-
 
     fun startRecordingThread() {
         if (application.recordingOn) {
@@ -79,8 +72,7 @@ class AudioRecorder(
                 val audioBuffer = ShortArray(BUFFER_SIZE)
                 while (application.recordingOn) {
                     audioRecord?.read(audioBuffer, 0, BUFFER_SIZE)
-                    val maxAmplitude = calculateMaxAmplitude(audioBuffer)
-                    processAmplitude(maxAmplitude)
+                    processAudioBuffer(audioBuffer)
                 }
                 audioRecord?.stop()
             }
@@ -88,34 +80,57 @@ class AudioRecorder(
         }
     }
 
-    private fun calculateMaxAmplitude(audioBuffer: ShortArray): Int {
-        // return audioBuffer.maxOf { abs(it.toInt()) }
-        return audioBuffer.max().toInt()
+    private fun processAudioBuffer(audioBuffer: ShortArray) {
+        val maxAmplitude = calcMaxAmplitude(audioBuffer)
+        Log.d("processAudioBuffer maxAmplitude", maxAmplitude.toString())
+        val rmsAmplitude = calcRmsAmplitude((audioBuffer))
+        val maxAmplitudeDbu = valToDbu(maxAmplitude)
+        val rmsAmplitudeDbu = valToDbu(rmsAmplitude)
+        sendLedData(maxAmplitudeDbu, rmsAmplitudeDbu)
+        Log.d("processAudioBuffer maxAmplitudeDbu", maxAmplitudeDbu.toString())
+        poolData(maxAmplitude, rmsAmplitude)
     }
 
-    private fun processAmplitude(amplitude: Int) {
-        val amplitudeDbu = valToDbu(amplitude.toFloat())
-        sendNotification(amplitude, amplitudeDbu.toInt())
-        poolData(amplitude)
+    private fun calcMaxAmplitude(audioBuffer: ShortArray): Double {
+        return audioBuffer.maxOf { abs(it.toDouble()) }
     }
 
-    private fun sendNotification(amplitude: Int, amplitudeDbu: Int) {
-        val intent = Intent("customtextforme")
-        intent.putExtra("amplitude", amplitude)
-        intent.putExtra("amplitudeDbu", amplitudeDbu)
+    private fun calcRmsAmplitude(audioBuffer: ShortArray): Double {
+        return sqrt(audioBuffer.map { it.toDouble().pow(2) }.average())
+    }
+
+    private fun valToDbu(rms: Double): Double {
+        // factor 2 = 6 dB
+        // factor 0.5 = -6 dB
+        // rms of 32000 = 20 dBu
+        return 20 * log10(0.00001 + rms.toDouble())
+    }
+
+    private fun sendLedData(maxAmplitudeDbu: Double, rmsAmplitudeDbu: Double) {
+        val intent = Intent("ledData")
+        intent.putExtra("maxAmplitudeDbu", maxAmplitudeDbu)
+        intent.putExtra("rmsAmplitudeDbu", rmsAmplitudeDbu)
+        intent.putExtra("threadId", Thread.currentThread().id)
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
     }
 
-    private fun poolData(amplitude: Int) {
-        valSquareSum += amplitude.toDouble().pow(2)
+    private fun poolData(maxAmplitude: Double, rmsAmplitude: Double) {
+        maxAmpList += maxAmplitude
+        rmsAmpSquareSum += rmsAmplitude.pow(2)
         counter += 1
         if (counter == nGroup) {
-            val valSquareAvg = valSquareSum / nGroup
-            val valRMS = sqrt(valSquareAvg).toFloat()
-            val valRMSdB = valToDbu(valRMS)
+            val maxAmp = maxAmpList.max()
+            val maxAmpDbu = valToDbu(maxAmp)
+            val rmsAmpSquareAvg = rmsAmpSquareSum / nGroup
+            val rmsAmp = sqrt(rmsAmpSquareAvg)
+            val rmsAmpDbu = valToDbu(rmsAmp)
             val time: Long = System.currentTimeMillis()
-            databaseAudio.insertData(time, valRMSdB)
-            valSquareSum = 0.0
+            databaseAudio.insertData(
+                time = time,
+                maxAmpDbu = maxAmpDbu.toFloat(),
+                rmsAmpDbu = rmsAmpDbu.toFloat()
+            )
+            maxAmpList = listOf<Double>()
             counter = 0
         }
     }
@@ -127,7 +142,7 @@ class AudioDatabaseThing() {
     private val repository = ValueRepository(database!!.valueDao())
     private val viewModel = ValueViewModel(repository)
 
-    fun insertData(time: Long, value: Float) {
-        viewModel.insert(Value(time = time, value = value))
+    fun insertData(time: Long, maxAmpDbu: Float, rmsAmpDbu: Float) {
+        viewModel.insert(Value(time = time, maxAmpDbu = maxAmpDbu, rmsAmpDbu = rmsAmpDbu))
     }
 }
