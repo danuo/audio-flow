@@ -21,6 +21,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
 
 class MainActivity : ComponentActivity() {
+    private val application: MainApplication = MainApplication.getInstance()
     lateinit var databaseHandler: DatabaseHandler
     lateinit var uiHandler: UiHandler
     val handler = Handler(Looper.getMainLooper())
@@ -69,7 +70,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onPause() {
         super.onPause()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver)
     }
 
     private fun getPermissionsNotification() {
@@ -119,9 +120,13 @@ class MainActivity : ComponentActivity() {
         val intent = Intent(applicationContext, ServerService::class.java)
         intent.action = "refresh"
         startService(intent)
+        if ((!application.wifiOn) and (!application.recordingOn)) {
+//            stopThing()
+        }
     }
 
     private fun stopThing() {
+        Log.d("MainActivity", "stopping service")
         val intent = Intent(applicationContext, ServerService::class.java)
         intent.action = "stop"
         startService(intent)
