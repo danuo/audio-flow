@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
     val handler = Handler(Looper.getMainLooper())
     var counter = 0
 
-    private val mMessageReceiver = object : BroadcastReceiver() {
+    private val ledDataReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             Log.d("MainActivity", "${intent?.action.toString()}")
             val maxAmplitudeDbu = intent?.getDoubleExtra("maxAmplitudeDbu", 20.0)?.toInt()
@@ -42,9 +42,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private val testReceiver = object : BroadcastReceiver() {
+    private val notificationEventReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.d("MainActivity", "testreceiver received")
+            Log.d("MainActivity", "testreceiver received, ${intent?.action}")
         }
     }
 
@@ -65,23 +65,23 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         LocalBroadcastManager.getInstance(this).registerReceiver(
-            mMessageReceiver,
+            ledDataReceiver,
             IntentFilter("ledData")
         )
-//'        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
-//            testReceiver,
-//            IntentFilter("testAction")
-//        )'
         applicationContext.registerReceiver(
-            testReceiver,
-            IntentFilter("testAction")
+            notificationEventReceiver,
+            IntentFilter("toggleRecord")
+        )
+        applicationContext.registerReceiver(
+            notificationEventReceiver,
+            IntentFilter("toggleWifi")
         )
     }
 
     override fun onPause() {
         super.onPause()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver)
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(testReceiver)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(ledDataReceiver)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(notificationEventReceiver)
     }
 
     private fun getPermissionsNotification() {
