@@ -8,7 +8,6 @@ import android.content.pm.ServiceInfo
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import android.os.Build
-import android.os.Handler
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.coroutines.CoroutineScope
@@ -69,21 +68,22 @@ class ServerService : Service() {
             while (true) {
                 // Log your variable here
                 Log.d("MyService", "running now")
-                sendLedData()
+                sendTestData()
                 // Delay for 5 seconds
                 delay(5000)
             }
         }
     }
 
-    private fun sendLedData() {
-        val intent = Intent("ledData")
-        val maxAmplitudeDbu: Double = 10.0
-        val rmsAmplitudeDbu: Double = 10.0
-        intent.putExtra("maxAmplitudeDbu", maxAmplitudeDbu)
-        intent.putExtra("rmsAmplitudeDbu", rmsAmplitudeDbu)
-        intent.putExtra("threadId", Thread.currentThread().id)
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+    private fun sendTestData() {
+        val intent = Intent("testAction")
+
+        // this works:
+        //LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+
+        // does this work?
+        // this works
+        applicationContext.sendBroadcast(intent)
     }
 
     private fun initService() {

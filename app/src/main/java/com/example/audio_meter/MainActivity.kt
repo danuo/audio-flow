@@ -68,7 +68,11 @@ class MainActivity : ComponentActivity() {
             mMessageReceiver,
             IntentFilter("ledData")
         )
-        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+//'        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+//            testReceiver,
+//            IntentFilter("testAction")
+//        )'
+        applicationContext.registerReceiver(
             testReceiver,
             IntentFilter("testAction")
         )
