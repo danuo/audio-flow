@@ -1,5 +1,7 @@
 package com.example.audio_meter
 
+import android.app.Notification
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -50,11 +52,7 @@ class ServerService : Service() {
     }
 
     private fun initService() {
-        val notification = NotificationCompat.Builder(this, "server_channel")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("Server Running")
-            .setContentText("Server can be stopped in the app")
-            .build()
+        val notification = getNotification()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(
                 1,
@@ -64,6 +62,50 @@ class ServerService : Service() {
         } else {
             startForeground(1, notification)
         }
+    }
+
+    private fun getNotification(): Notification {
+        val recordToggleIntent = Intent("actionData")
+        recordToggleIntent.action = "toggleRecord"
+        val recordTogglePendingIntent = PendingIntent.getBroadcast(
+            this, 0, recordToggleIntent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val wifiToggleIntent = Intent("actionData")
+        wifiToggleIntent.action = "toggleWifi"
+        val wifiTogglePendingIntent =
+            PendingIntent.getBroadcast(
+                this, 0, wifiToggleIntent,
+                PendingIntent.FLAG_IMMUTABLE
+            )
+
+        val recorderString = if (application.recordingOn) {
+            "Record running"
+        } else {
+            "Record stopped"
+        }
+        val serverString = if (application.wifiOn) {
+            "Server running"
+        } else {
+            "Server stopped"
+        }
+        val combinedString = recorderString + "\n" + serverString
+        return NotificationCompat.Builder(this, "server_channel")
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle("Audio Flow Service")
+            .setContentText(combinedString)
+            .setOngoing(true)
+            .addAction(
+                androidx.appcompat.R.drawable.abc_btn_radio_material,
+                "stop record",
+                recordTogglePendingIntent
+            ).addAction(
+                androidx.appcompat.R.drawable.abc_text_select_handle_middle_mtrl,
+                "stop wifi",
+                wifiTogglePendingIntent
+            )
+            .build()
     }
 
     private fun startSubServices() {

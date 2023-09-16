@@ -28,7 +28,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".ServerService" />
+        <service
+            android:name=".ServerService"
+            android:foregroundServiceType="microphone" />
     </application>
 
 </manifest>
