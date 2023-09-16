@@ -26,12 +26,12 @@ class MainActivity : ComponentActivity() {
 
     private val mMessageReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
+            Log.d("MainActivity", "${intent?.action.toString()}")
             val maxAmplitudeDbu = intent?.getDoubleExtra("maxAmplitudeDbu", 20.0)?.toInt()
             val rmsAmplitudeDbu = intent?.getDoubleExtra("rmsAmplitudeDbu", 20.0)?.toInt()
-            val threadId = intent?.getLongExtra("threadId", 0)
+//            val threadId = intent?.getLongExtra("threadId", 0)
             if ((maxAmplitudeDbu is Int) and (rmsAmplitudeDbu is Int)) {
                 counter += 1
-                Log.d("mainactivity", "${maxAmplitudeDbu.toString()} $counter $threadId")
                 uiHandler.updateUI(
                     mapOf(
                         "maxAmplitudeDbu" to maxAmplitudeDbu!!,
@@ -39,6 +39,12 @@ class MainActivity : ComponentActivity() {
                     )
                 )
             }
+        }
+    }
+
+    private val testReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            Log.d("MainActivity", "testreceiver received")
         }
     }
 
@@ -62,11 +68,16 @@ class MainActivity : ComponentActivity() {
             mMessageReceiver,
             IntentFilter("ledData")
         )
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+            testReceiver,
+            IntentFilter("testAction")
+        )
     }
 
     override fun onPause() {
         super.onPause()
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(testReceiver)
     }
 
     private fun getPermissionsNotification() {

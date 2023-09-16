@@ -82,13 +82,13 @@ class AudioRecorder(
 
     private fun processAudioBuffer(audioBuffer: ShortArray) {
         val maxAmplitude = calcMaxAmplitude(audioBuffer)
-        Log.d("processAudioBuffer maxAmplitude", maxAmplitude.toString())
         val rmsAmplitude = calcRmsAmplitude((audioBuffer))
         val maxAmplitudeDbu = valToDbu(maxAmplitude)
         val rmsAmplitudeDbu = valToDbu(rmsAmplitude)
         sendLedData(maxAmplitudeDbu, rmsAmplitudeDbu)
-        Log.d("processAudioBuffer maxAmplitudeDbu", maxAmplitudeDbu.toString())
         poolData(maxAmplitude, rmsAmplitude)
+//        Log.d("processAudioBuffer maxAmplitude", maxAmplitude.toString())
+//        Log.d("processAudioBuffer maxAmplitudeDbu", maxAmplitudeDbu.toString())
     }
 
     private fun calcMaxAmplitude(audioBuffer: ShortArray): Double {

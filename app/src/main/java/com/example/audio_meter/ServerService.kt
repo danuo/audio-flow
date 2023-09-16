@@ -8,7 +8,14 @@ import android.content.pm.ServiceInfo
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import android.os.Build
+import android.os.Handler
 import android.util.Log
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class ServerService : Service() {
     private lateinit var audioRecorder: AudioRecorder
@@ -16,6 +23,9 @@ class ServerService : Service() {
     private var serverRunnable: ServerRunner? = null
     private var serverThread: Thread? = null
     private var htmlString: String = ""
+
+    private val scope = CoroutineScope(Dispatchers.IO)
+    private var job: Job? = null
 
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -36,6 +46,7 @@ class ServerService : Service() {
         }
         when (intent?.action) {
             "start" -> {
+                startDebugThread()
                 initService()
                 startSubServices()
             }
@@ -49,6 +60,30 @@ class ServerService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         stopWifiServer()
+        job?.cancel()
+    }
+
+    private fun startDebugThread() {
+        job?.cancel()
+        job = scope.launch {
+            while (true) {
+                // Log your variable here
+                Log.d("MyService", "running now")
+                sendLedData()
+                // Delay for 5 seconds
+                delay(5000)
+            }
+        }
+    }
+
+    private fun sendLedData() {
+        val intent = Intent("ledData")
+        val maxAmplitudeDbu: Double = 10.0
+        val rmsAmplitudeDbu: Double = 10.0
+        intent.putExtra("maxAmplitudeDbu", maxAmplitudeDbu)
+        intent.putExtra("rmsAmplitudeDbu", rmsAmplitudeDbu)
+        intent.putExtra("threadId", Thread.currentThread().id)
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
     }
 
     private fun initService() {
@@ -64,19 +99,34 @@ class ServerService : Service() {
         }
     }
 
+
     private fun getNotification(): Notification {
-        val recordToggleIntent = Intent("actionData")
-        recordToggleIntent.action = "toggleRecord"
+
+        Log.d("ServerService", "inside getNotification()")
+
+        val randomIntent = Intent("testAction")
+        LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(randomIntent)
+
+
+        // pending intent
+        val recordToggleIntent = Intent("testAction")
+//        recordToggleIntent.action = "toggleRecord"
+//        val recordTogglePendingIntent = PendingIntent.getBroadcast(
+//            this, 1, recordToggleIntent,
+//            PendingIntent.FLAG_IMMUTABLE
+//        )
         val recordTogglePendingIntent = PendingIntent.getBroadcast(
-            this, 0, recordToggleIntent,
-            PendingIntent.FLAG_IMMUTABLE
+            applicationContext,
+            0,
+            recordToggleIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val wifiToggleIntent = Intent("actionData")
         wifiToggleIntent.action = "toggleWifi"
         val wifiTogglePendingIntent =
             PendingIntent.getBroadcast(
-                this, 0, wifiToggleIntent,
+                this, 2, wifiToggleIntent,
                 PendingIntent.FLAG_IMMUTABLE
             )
 
@@ -100,11 +150,12 @@ class ServerService : Service() {
                 androidx.appcompat.R.drawable.abc_btn_radio_material,
                 "stop record",
                 recordTogglePendingIntent
-            ).addAction(
-                androidx.appcompat.R.drawable.abc_text_select_handle_middle_mtrl,
-                "stop wifi",
-                wifiTogglePendingIntent
             )
+//            .addAction(
+//                androidx.appcompat.R.drawable.abc_text_select_handle_middle_mtrl,
+//                "stop wifi",
+//                wifiTogglePendingIntent
+//            )
             .build()
     }
 
