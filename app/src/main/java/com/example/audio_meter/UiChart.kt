@@ -2,13 +2,13 @@ package com.example.audio_meter
 
 import android.annotation.SuppressLint
 import android.graphics.Color
+import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import java.text.SimpleDateFormat
 import java.util.Date
-import com.github.mikephil.charting.charts.LineChart
 
 class UiChart(private val chart: LineChart, dbThresholds: List<Float>) {
 
@@ -50,30 +50,52 @@ class UiChart(private val chart: LineChart, dbThresholds: List<Float>) {
     }
 
     fun updateChart(data: List<Value>) {
-        val maxDataSet =
-            LineDataSet(data.map {
+        if (chart.data != null &&
+            chart.data.dataSetCount > 0
+        ) { // update
+            val setMaxAmplitude = chart.data.getDataSetByIndex(0) as LineDataSet
+            setMaxAmplitude.values = data.map {
                 Entry(
                     (it.time - TIME_SHIFT).toFloat(),
                     it.maxAmpDbu + application.dbShift
                 )
-            }, "Temperature")
-        maxDataSet.setDrawCircles(false)
-        maxDataSet.setDrawValues(false)
-        maxDataSet.color = 0xFFFF0000.toInt()
-        val maxLineData = LineData(maxDataSet)
-        val rmsDataSet = LineDataSet(data.map {
-            Entry(
-                (it.time - TIME_SHIFT).toFloat(),
-                it.rmsAmpDbu + application.dbShift
-            )
-        }, "Temperature")
-        rmsDataSet.setDrawCircles(false)
-        rmsDataSet.setDrawValues(false)
-        rmsDataSet.color = 0xFFFF0000.toInt()
-        val rmsLineData = LineData(rmsDataSet)
-        chart.data = maxLineData
+            }
+            val setRmsAmplitude = chart.data.getDataSetByIndex(1) as LineDataSet
+            setRmsAmplitude.values = data.map {
+                Entry(
+                    (it.time - TIME_SHIFT).toFloat(),
+                    it.rmsAmpDbu + application.dbShift
+                )
+            }
+            chart.data.notifyDataChanged()
+            chart.notifyDataSetChanged()
+            chart.invalidate()
+        } else {
+            // create datasets
+            val maxDataSet =
+                LineDataSet(data.map {
+                    Entry(
+                        (it.time - TIME_SHIFT).toFloat(),
+                        it.maxAmpDbu + application.dbShift
+                    )
+                }, "max amplitude")
+            maxDataSet.setDrawCircles(false)
+            maxDataSet.setDrawValues(false)
+            maxDataSet.color = 0xFFFF0000.toInt()
+            val rmsDataSet = LineDataSet(data.map {
+                Entry(
+                    (it.time - TIME_SHIFT).toFloat(),
+                    it.rmsAmpDbu + application.dbShift
+                )
+            }, "rms amplitude")
+            rmsDataSet.setDrawCircles(false)
+            rmsDataSet.setDrawValues(false)
+            rmsDataSet.color = 0xFF00FF00.toInt()
+            val lineData = LineData(maxDataSet, rmsDataSet)
 
-        chart.invalidate()
+            chart.data = lineData
+            chart.invalidate()
+        }
     }
 }
 

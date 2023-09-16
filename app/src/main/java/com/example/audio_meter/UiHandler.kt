@@ -31,8 +31,8 @@ class UiHandler(
     private val dbShiftNum: EditText = context.findViewById(R.id.dbShiftNum)
     private val dbTargetNum: EditText = context.findViewById(R.id.dbTargetNum)
     private val audioMeterLayout: LinearLayout = context.findViewById((R.id.audioMeterLayout))
-    private var maxAmpDbu: Float = 0f
-    private var rmsAmpDbu: Float = 0f
+    private var maxAmpDbu: Float = -50f
+    private var rmsAmpDbu: Float = -50f
     private var nSamples: Int = 0
 
     private val drawables: Map<String, List<Drawable>>
