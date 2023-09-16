@@ -131,6 +131,7 @@ class AudioRecorder(
                 rmsAmpDbu = rmsAmpDbu.toFloat()
             )
             maxAmpList = listOf()
+            rmsAmpSquareSum = 0.0
             counter = 0
         }
     }
