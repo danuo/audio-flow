@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
 
     private val ledDataReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.d("MainActivity", "${intent?.action.toString()}")
+            Log.d("MainActivity", "${intent?.action}")
             val maxAmplitudeDbu = intent?.getDoubleExtra("maxAmplitudeDbu", 20.0)?.toInt()
             val rmsAmplitudeDbu = intent?.getDoubleExtra("rmsAmplitudeDbu", 20.0)?.toInt()
 //            val threadId = intent?.getLongExtra("threadId", 0)
@@ -44,6 +44,18 @@ class MainActivity : ComponentActivity() {
 
     private val notificationEventReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
+            intent?.let {
+                if (intent.action == "toggleRecord") {
+                    application.toggleRecording()
+                    uiHandler.updateButtons()
+                    updateService()
+                }
+                if (intent.action == "toggleWifi") {
+                    application.toggleWifi()
+                    uiHandler.updateButtons()
+                    updateService()
+                }
+            }
             Log.d("MainActivity", "testreceiver received, ${intent?.action}")
         }
     }
@@ -53,8 +65,8 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d("MainActivity", "now")
         super.onCreate(savedInstanceState)
+        Log.d("MainActivity", "now")
         setContentView(R.layout.activity_main)
 
         uiHandler = UiHandler(this)
@@ -70,11 +82,11 @@ class MainActivity : ComponentActivity() {
         )
         applicationContext.registerReceiver(
             notificationEventReceiver,
-            IntentFilter("toggleRecord")
+            IntentFilter("toggleRecord"),
         )
         applicationContext.registerReceiver(
             notificationEventReceiver,
-            IntentFilter("toggleWifi")
+            IntentFilter("toggleWifi"),
         )
     }
 
@@ -127,12 +139,12 @@ class MainActivity : ComponentActivity() {
         startService(intent)
     }
 
-    fun updateThing() {
+    fun updateService() {
         val intent = Intent(applicationContext, ServerService::class.java)
         intent.action = "refresh"
         startService(intent)
         if ((!application.wifiOn) and (!application.recordingOn)) {
-//            stopThing()
+            stopThing()
         }
     }
 

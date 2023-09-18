@@ -45,6 +45,13 @@ class UiHandler(
 
     private val buttonHeight: Int
 
+    private val startWifiButton = context.findViewById<Button>(R.id.startWifi)
+    private val toggleOptionsButton: Button = context.findViewById(R.id.toggleOptionsButton)
+    private val toggleDebugButton: Button = context.findViewById(R.id.toggleDebugButton)
+    private val deleteDataButton = context.findViewById<Button>(R.id.deleteDataButton)
+    private val generateDataButton = context.findViewById<Button>(R.id.generateDataButton)
+    private val startRecordButton = context.findViewById<Button>(R.id.startButton)
+
 
     init {
         dbThresholds = getDbThresholds()
@@ -55,48 +62,33 @@ class UiHandler(
         optionsLayout = context.findViewById(R.id.optionsLayout)
         applyVisibility()
         initOptionButtons()
-        val toggleOptionsButton: Button = context.findViewById(R.id.toggleOptionsButton)
         toggleOptionsButton.setOnClickListener {
             optionsLayoutVisible = !optionsLayoutVisible
             applyVisibility()
         }
         buttonHeight = toggleOptionsButton.height
-        val toggleDebugButton: Button = context.findViewById(R.id.toggleDebugButton)
         toggleDebugButton.setOnClickListener {
             debugLayoutVisible = !debugLayoutVisible
             applyVisibility()
         }
-        val deleteDataButton = context.findViewById<Button>(R.id.deleteDataButton)
         deleteDataButton.setOnClickListener {
             showDeleteConfirmationDialog()
         }
-        val generateDataButton = context.findViewById<Button>(R.id.generateDataButton)
         generateDataButton.setOnClickListener {
             generateData()
         }
-        val startWifiButton = context.findViewById<Button>(R.id.startWifi)
         startWifiButton.setOnClickListener {
-            if (application.wifiOn) {
-                application.wifiOn = false
-                startWifiButton.text = "Start Wifi"
-                context.updateThing()
-            } else {
-                application.wifiOn = true
-                startWifiButton.text = "Stop Wifi"
-                context.updateThing()
-            }
+            application.toggleWifi()
+            updateButtons()
+            context.updateService()
         }
-        val startRecordButton = context.findViewById<Button>(R.id.startButton)
         startRecordButton.setOnClickListener {
-            application.recordingOn = !application.recordingOn
-            if (application.recordingOn) {
-                context.updateThing()
-                startRecordButton.text = "Stop Recording"
-            } else {
-                startRecordButton.text = "Start Recording"
-            }
+            application.toggleRecording()
+            updateButtons()
+            context.updateService()
         }
     }
+
 
     private fun initOptionButtons() {
         val timeSelector = context.findViewById<LinearLayout>(R.id.timeSelector)
@@ -185,8 +177,24 @@ class UiHandler(
             nSamples = data["nSamples"]!!
         }
 
+        updateButtons()
+
         updateText()
         updateLeds()
+    }
+
+    fun updateButtons() {
+        if (application.recordingOn) {
+            startRecordButton.text = "Stop Recording"
+        } else {
+            startRecordButton.text = "Start Recording"
+        }
+
+        if (application.wifiOn) {
+            startWifiButton.text = "Stop Wifi"
+        } else {
+            startWifiButton.text = "Start Wifi"
+        }
     }
 
     private fun updateText() {

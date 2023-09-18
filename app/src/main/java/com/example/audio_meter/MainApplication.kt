@@ -44,10 +44,10 @@ class MainApplication : Application() {
         override fun onReceive(context: Context?, intent: Intent?) {
             Log.d("MainApplication", "received action intent")
             if (intent?.action == "toggleRecord") {
-                recordingOn = !recordingOn
+                toggleRecording()
             }
             if (intent?.action == "toggleWifi") {
-                wifiOn = !wifiOn
+                toggleWifi()
             }
         }
     }
@@ -70,16 +70,14 @@ class MainApplication : Application() {
         ValueDatabase.loadDatabase(this)
 
         // create notification channel
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                "server_channel",
-                "Server Notification",
-                NotificationManager.IMPORTANCE_HIGH
-            )
-            val notificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
+        val channel = NotificationChannel(
+            "server_channel",
+            "Server Notification",
+            NotificationManager.IMPORTANCE_HIGH
+        )
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
             actionReceiver,
@@ -91,5 +89,17 @@ class MainApplication : Application() {
         preferences = this.getSharedPreferences("com.example.audio_meter", Context.MODE_PRIVATE)
         dbShift = preferences.getFloat("dbShift", -70f)
         dbTarget = preferences.getFloat("dbTarget", 10f)
+    }
+
+
+    fun toggleRecording() {
+        // 1. change value
+        // 2. update ui
+        // 3. update services
+        recordingOn = !recordingOn
+    }
+
+    fun toggleWifi() {
+        wifiOn != wifiOn
     }
 }
