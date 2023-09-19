@@ -157,13 +157,13 @@
             android:layout_height="match_parent" />
 
         <LinearLayout
-            android:id="@+id/audioMeterLayoutText"
+            android:id="@+id/audioFlowLayoutText"
             android:layout_width="40dp"
             android:layout_height="match_parent"
             android:orientation="vertical"></LinearLayout>
 
         <LinearLayout
-            android:id="@+id/audioMeterLayout"
+            android:id="@+id/audioFlowLayout"
             android:layout_width="40dp"
             android:layout_height="match_parent"
             android:orientation="vertical"></LinearLayout>

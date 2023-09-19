@@ -1,4 +1,4 @@
-package com.example.audio_meter
+package com.example.audio_flow
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
@@ -30,7 +30,7 @@ class UiHandler(
     private val amplitudeTextView: TextView = context.findViewById(R.id.amplitudeText)
     private val dbShiftNum: EditText = context.findViewById(R.id.dbShiftNum)
     private val dbTargetNum: EditText = context.findViewById(R.id.dbTargetNum)
-    private val audioMeterLayout: LinearLayout = context.findViewById((R.id.audioMeterLayout))
+    private val audioFlowLayout: LinearLayout = context.findViewById((R.id.audioFlowLayout))
     private var maxAmpDbu: Float = -50f
     private var rmsAmpDbu: Float = -50f
     private var nSamples: Int = 0
@@ -226,8 +226,8 @@ class UiHandler(
     }
 
     private fun initLeds() {
-        val audioMeterLayout = context.findViewById<LinearLayout>(R.id.audioMeterLayout)
-        val audioMeterLayoutText = context.findViewById<LinearLayout>(R.id.audioMeterLayoutText)
+        val audioFlowLayout = context.findViewById<LinearLayout>(R.id.audioFlowLayout)
+        val audioFlowLayoutText = context.findViewById<LinearLayout>(R.id.audioFlowLayoutText)
         val widthView = (Resources.getSystem().displayMetrics.density * 40).toInt()
         val widthText = (Resources.getSystem().displayMetrics.density * 40).toInt()
         val layoutParamsView = LinearLayout.LayoutParams(widthView, 0)
@@ -239,7 +239,7 @@ class UiHandler(
             val view = View(context)
             view.layoutParams = layoutParamsView
             view.setBackgroundColor((0xFF000000).toInt())
-            audioMeterLayout.addView(view)
+            audioFlowLayout.addView(view)
 
             if (i % 2 == 0) {
                 val thresh = dbThresholds[N_LEDS - 1 - i]
@@ -249,7 +249,7 @@ class UiHandler(
                 text.textSize = 11f
                 text.gravity = Gravity.END
                 text.setPadding(0, 0, 10, 0)
-                audioMeterLayoutText.addView(text)
+                audioFlowLayoutText.addView(text)
             }
         }
     }
@@ -269,7 +269,7 @@ class UiHandler(
         context.handler.post {
             for (index in 0 until N_LEDS) {
                 val thresh = dbThresholds[index]
-                val led = audioMeterLayout.getChildAt(N_LEDS - 1 - index) as View
+                val led = audioFlowLayout.getChildAt(N_LEDS - 1 - index) as View
                 led.background = getDrawable(maxAmpDbu = maxAmpDbu, thresh = thresh)
             }
         }

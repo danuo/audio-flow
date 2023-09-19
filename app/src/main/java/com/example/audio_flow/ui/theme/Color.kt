@@ -1,4 +1,4 @@
-package com.example.audio_meter.ui.theme
+package com.example.audio_flow.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

@@ -1,4 +1,4 @@
-package com.example.audio_meter
+package com.example.audio_flow
 
 import android.app.Application
 import android.app.NotificationChannel
@@ -86,7 +86,7 @@ class MainApplication : Application() {
     }
 
     private fun initSharedPrefs() {
-        preferences = this.getSharedPreferences("com.example.audio_meter", Context.MODE_PRIVATE)
+        preferences = this.getSharedPreferences("com.example.audio_flow", Context.MODE_PRIVATE)
         dbShift = preferences.getFloat("dbShift", -70f)
         dbTarget = preferences.getFloat("dbTarget", 10f)
     }

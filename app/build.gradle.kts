@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.audio_meter"
+    namespace = "com.example.audio_flow"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.audio_meter"
+        applicationId = "com.example.audio_flow"
         minSdk = 28
         targetSdk = 33
         versionCode = 1

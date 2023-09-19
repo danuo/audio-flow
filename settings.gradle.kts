@@ -16,5 +16,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "audio-meter"
+rootProject.name = "audio-flow"
 include(":app")
