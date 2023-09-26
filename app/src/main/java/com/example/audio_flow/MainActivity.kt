@@ -26,10 +26,9 @@ class MainActivity : ComponentActivity() {
 
     private val ledDataReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.d("MainActivity", "${intent?.action}")
+            Log.d("MainActivity", "ledDataReceiver, ${intent?.action}")
             val maxAmplitudeDbu = intent?.getDoubleExtra("maxAmplitudeDbu", 20.0)?.toInt()
             val rmsAmplitudeDbu = intent?.getDoubleExtra("rmsAmplitudeDbu", 20.0)?.toInt()
-//            val threadId = intent?.getLongExtra("threadId", 0)
             if ((maxAmplitudeDbu is Int) and (rmsAmplitudeDbu is Int)) {
                 counter += 1
                 uiHandler.updateUI(
@@ -42,21 +41,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private val notificationEventReceiver = object : BroadcastReceiver() {
+    private val uiReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            intent?.let {
-                if (intent.action == "toggleRecord") {
-                    application.toggleRecording()
-                    uiHandler.updateButtons()
-                    updateService()
-                }
-                if (intent.action == "toggleWifi") {
-                    application.toggleWifi()
-                    uiHandler.updateButtons()
-                    updateService()
-                }
-            }
-            Log.d("MainActivity", "testreceiver received, ${intent?.action}")
+            Log.d("MainActivity", "${intent?.action}")
+            uiHandler.updateButtons()
         }
     }
 
@@ -76,24 +64,22 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        LocalBroadcastManager.getInstance(this).registerReceiver(
+        LocalBroadcastManager.getInstance(application).registerReceiver(
             ledDataReceiver,
             IntentFilter("ledData")
         )
-        applicationContext.registerReceiver(
-            notificationEventReceiver,
-            IntentFilter("toggleRecord"),
-        )
-        applicationContext.registerReceiver(
-            notificationEventReceiver,
-            IntentFilter("toggleWifi"),
+        LocalBroadcastManager.getInstance(application).registerReceiver(
+            uiReceiver,
+            IntentFilter("updateUi")
         )
     }
 
     override fun onPause() {
         super.onPause()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(ledDataReceiver)
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(notificationEventReceiver)
+        LocalBroadcastManager.getInstance(application)
+            .unregisterReceiver(ledDataReceiver)
+        LocalBroadcastManager.getInstance(application)
+            .unregisterReceiver(uiReceiver)
     }
 
     private fun getPermissionsNotification() {
@@ -104,6 +90,18 @@ class MainActivity : ComponentActivity() {
                 0
             )
         }
+        // no user interaction needed?
+        var test: Boolean? = null
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            // permission is given
+            test = true
+        }
+        Log.d("MainActivity", "A: notification permission is: $test")
+
         getPermissionAudio()
     }
 
@@ -113,50 +111,22 @@ class MainActivity : ComponentActivity() {
                 Manifest.permission.RECORD_AUDIO
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            startService()
+            // permission is given
+            application.permissionAudio = true
         } else {
             val requestPermissionLauncher =
                 this.registerForActivityResult(
                     ActivityResultContracts.RequestPermission()
                 ) { isGranted: Boolean ->
-                    if (isGranted) {
-                        startService()
-                    }
+                    application.permissionAudio = isGranted
+                    Log.d("MainActivity", "B: audio permission is: ${application.permissionAudio}")
                 }
-
             requestPermissionLauncher.launch(
                 Manifest.permission.RECORD_AUDIO
             )
         }
+        Log.d("MainActivity", "A: audio permission is: ${application.permissionAudio}")
     }
 
-    private fun startService() {
-        val intent = Intent(applicationContext, ServerService::class.java)
-        val htmlString =
-            loadHtmlResourceToString(context = this, R.raw.index).trimIndent()
-        intent.putExtra("html", htmlString)
-        intent.action = "start"
-        startService(intent)
-    }
 
-    fun updateService() {
-        val intent = Intent(applicationContext, ServerService::class.java)
-        intent.action = "refresh"
-        startService(intent)
-        if ((!application.wifiOn) and (!application.recordingOn)) {
-            stopThing()
-        }
-    }
-
-    private fun stopThing() {
-        Log.d("MainActivity", "stopping service")
-        val intent = Intent(applicationContext, ServerService::class.java)
-        intent.action = "stop"
-        startService(intent)
-    }
-
-    private fun loadHtmlResourceToString(context: Context, resourceId: Int): String {
-        val inputStream = context.resources.openRawResource(resourceId)
-        return inputStream.readBytes().toString(Charsets.UTF_8)
-    }
 }

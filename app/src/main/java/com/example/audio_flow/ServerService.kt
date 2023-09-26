@@ -9,7 +9,6 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import android.os.Build
 import android.util.Log
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
 class ServerService : Service() {
     private lateinit var audioRecorder: AudioRecorder
@@ -19,6 +18,7 @@ class ServerService : Service() {
     private var htmlString: String = ""
 
     override fun onBind(intent: Intent?): IBinder? {
+        Log.d("ServerService", "onBind()")
         return null
     }
 
@@ -29,6 +29,7 @@ class ServerService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d("ServerService", "onStartCommand()")
         intent?.let {
             if (intent.hasExtra("html")) {
                 htmlString = intent.getStringExtra("html")!!
@@ -67,9 +68,6 @@ class ServerService : Service() {
     private fun getNotification(): Notification {
 
         Log.d("ServerService", "inside getNotification()")
-
-        val randomIntent = Intent("testAction")
-        LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(randomIntent)
 
         // pending intent
         val recordToggleIntent = Intent("toggleRecord")

@@ -2,6 +2,7 @@ package com.example.audio_flow
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.Intent
 
 import android.content.res.Resources
 import android.view.View
@@ -77,15 +78,13 @@ class UiHandler(
         generateDataButton.setOnClickListener {
             generateData()
         }
-        startWifiButton.setOnClickListener {
-            application.toggleWifi()
-            updateButtons()
-            context.updateService()
-        }
+
         startRecordButton.setOnClickListener {
             application.toggleRecording()
-            updateButtons()
-            context.updateService()
+        }
+
+        startWifiButton.setOnClickListener {
+            application.toggleWifi()
         }
     }
 
@@ -178,22 +177,23 @@ class UiHandler(
         }
 
         updateButtons()
-
         updateText()
         updateLeds()
     }
 
     fun updateButtons() {
-        if (application.recordingOn) {
-            startRecordButton.text = "Stop Recording"
-        } else {
-            startRecordButton.text = "Start Recording"
-        }
+        context.handler.post {
+            if (application.recordingOn) {
+                startRecordButton.text = "Stop Recording"
+            } else {
+                startRecordButton.text = "Start Recording"
+            }
 
-        if (application.wifiOn) {
-            startWifiButton.text = "Stop Wifi"
-        } else {
-            startWifiButton.text = "Start Wifi"
+            if (application.wifiOn) {
+                startWifiButton.text = "Stop Wifi"
+            } else {
+                startWifiButton.text = "Start Wifi"
+            }
         }
     }
 

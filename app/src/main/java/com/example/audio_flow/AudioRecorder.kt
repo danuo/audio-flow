@@ -28,6 +28,7 @@ class AudioRecorder(
     private var rmsAmpSquareSum: Double = 0.0
     private val databaseAudio: AudioDatabaseThing = AudioDatabaseThing()
     private var recordingThread: Thread? = null
+    var sendTime = System.currentTimeMillis()
 
     init {
         initAudio()
@@ -107,11 +108,17 @@ class AudioRecorder(
     }
 
     private fun sendLedData(maxAmplitudeDbu: Double, rmsAmplitudeDbu: Double) {
-        val intent = Intent("ledData")
-        intent.putExtra("maxAmplitudeDbu", maxAmplitudeDbu)
-        intent.putExtra("rmsAmplitudeDbu", rmsAmplitudeDbu)
-        intent.putExtra("threadId", Thread.currentThread().id)
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
+        val nowTime = System.currentTimeMillis()
+        // every 80 ms does not work
+        if (nowTime - sendTime > 80) {
+            sendTime = nowTime
+            val intent = Intent("ledData")
+            intent.putExtra("maxAmplitudeDbu", maxAmplitudeDbu)
+            intent.putExtra("rmsAmplitudeDbu", rmsAmplitudeDbu)
+            intent.putExtra("test", rmsAmplitudeDbu)
+            LocalBroadcastManager.getInstance(application).sendBroadcast(intent)
+            Log.d("AudioRecorder", "sending intent")
+        }
     }
 
     private fun poolData(maxAmplitude: Double, rmsAmplitude: Double) {

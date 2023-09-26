@@ -18,6 +18,10 @@ class MainApplication : Application() {
     var wifiOn = false
     var recordingOn = false
 
+    var permissionNotification = false
+    var permissionAudio = false
+    var serviceStarted = false
+
     private var _dbShift: Float = 0f
     var dbShift: Float
         get() = _dbShift
@@ -40,15 +44,18 @@ class MainApplication : Application() {
 
     var showMilliseconds: Long = 3600 * 1000
 
-    private val actionReceiver = object : BroadcastReceiver() {
+
+    private val notificationEventReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.d("MainApplication", "received action intent")
-            if (intent?.action == "toggleRecord") {
-                toggleRecording()
+            intent?.let {
+                if (intent.action == "toggleRecord") {
+                    toggleRecording()
+                }
+                if (intent.action == "toggleWifi") {
+                    toggleWifi()
+                }
             }
-            if (intent?.action == "toggleWifi") {
-                toggleWifi()
-            }
+            Log.d("MainApplication", "intent received, ${intent?.action}")
         }
     }
 
@@ -59,15 +66,17 @@ class MainApplication : Application() {
         }
     }
 
+    private fun updateUiBroadcast() {
+        Log.d("MainApplication", "updateUiBroadcast")
+        val intent = Intent("updateUi")
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+    }
+
     override fun onCreate() {
         super.onCreate()
         instance = this
-
-        // init shared prefs
-        initSharedPrefs()
-
-        // init database
-        ValueDatabase.loadDatabase(this)
+        initSharedPrefs()  // init shared prefs
+        ValueDatabase.loadDatabase(this)  // init database
 
         // create notification channel
         val channel = NotificationChannel(
@@ -79,9 +88,14 @@ class MainApplication : Application() {
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-            actionReceiver,
-            IntentFilter("actionData")
+        this.registerReceiver(
+            notificationEventReceiver,
+            IntentFilter("toggleRecord"),
+        )
+
+        this.registerReceiver(
+            notificationEventReceiver,
+            IntentFilter("toggleWifi"),
         )
     }
 
@@ -91,15 +105,54 @@ class MainApplication : Application() {
         dbTarget = preferences.getFloat("dbTarget", 10f)
     }
 
-
     fun toggleRecording() {
-        // 1. change value
-        // 2. update ui
-        // 3. update services
         recordingOn = !recordingOn
+        updateUiBroadcast()
+        updateService()
     }
 
     fun toggleWifi() {
         wifiOn != wifiOn
+        updateUiBroadcast()
+        updateService()
+    }
+
+    // service stuff------------------------------------------------------------------
+    private fun initService() {
+        Log.d("MainApplication", "initService()")
+        val intent = Intent(applicationContext, ServerService::class.java)
+        val htmlString =
+            loadHtmlResourceToString(context = this, R.raw.index).trimIndent()
+        intent.putExtra("html", htmlString)
+        intent.action = "start"
+        startService(intent)
+    }
+
+    fun updateService() {
+        if ((!serviceStarted) and (wifiOn or recordingOn)) {
+            initService()
+            serviceStarted = true
+        }
+
+        // send refresh
+        val intent = Intent(applicationContext, ServerService::class.java)
+        intent.action = "refresh"
+        startService(intent)
+
+        if ((!wifiOn) and (!recordingOn)) {
+            stopService()
+        }
+    }
+
+    private fun stopService() {
+        Log.d("MainActivity", "stopping service")
+        val intent = Intent(applicationContext, ServerService::class.java)
+        intent.action = "stop"
+        startService(intent)
+    }
+
+    private fun loadHtmlResourceToString(context: Context, resourceId: Int): String {
+        val inputStream = context.resources.openRawResource(resourceId)
+        return inputStream.readBytes().toString(Charsets.UTF_8)
     }
 }
