@@ -17,6 +17,11 @@ import androidx.core.app.ActivityCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
 
+//bugs:
+//will start without microphone permission -> causes plenty of bugs
+//notification will not respawn
+
+
 class MainActivity : ComponentActivity() {
     private val application: MainApplication = MainApplication.getInstance()
     lateinit var databaseHandler: DataHandler

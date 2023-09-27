@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
-import android.os.Build
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
@@ -97,6 +96,8 @@ class MainApplication : Application() {
             notificationEventReceiver,
             IntentFilter("toggleWifi"),
         )
+
+        initService()
     }
 
     private fun initSharedPrefs() {
@@ -128,16 +129,12 @@ class MainApplication : Application() {
         startService(intent)
     }
 
-    fun updateService() {
-        if ((!serviceStarted) and (wifiOn or recordingOn)) {
-            initService()
-            serviceStarted = true
+    private fun updateService() {
+        if (wifiOn or recordingOn) {
+            val intent = Intent(applicationContext, ServerService::class.java)
+            intent.action = "start"
+            startService(intent)
         }
-
-        // send refresh
-        val intent = Intent(applicationContext, ServerService::class.java)
-        intent.action = "refresh"
-        startService(intent)
 
         if ((!wifiOn) and (!recordingOn)) {
             stopService()

@@ -36,13 +36,17 @@ class ServerService : Service() {
             }
         }
         when (intent?.action) {
-            "start" -> {
-                initService()
-                startSubServices()
+            "start" -> {  // refresh both
+                refreshNotification()
+                refreshSubServices()
             }
 
-            "refresh" -> startSubServices()
-            "stop" -> stopSelf()
+            "refreshNotification" -> refreshNotification()
+            "refreshServices" -> refreshSubServices()
+            "stop" -> {
+                Log.d("ServerService", "stopSelf()")
+                stopSelf()
+            }
         }
         return super.onStartCommand(intent, flags, startId)
     }
@@ -52,7 +56,8 @@ class ServerService : Service() {
         stopWifiServer()
     }
 
-    private fun initService() {
+    private fun refreshNotification() {
+        Log.d("ServerService", "initService()")
         val notification = getNotification()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(
@@ -114,7 +119,7 @@ class ServerService : Service() {
             .build()
     }
 
-    private fun startSubServices() {
+    private fun refreshSubServices() {
         Log.d("ServerService", "executing startSubServices")
         if (application.wifiOn) {
             Log.d("ServerService", "executing startSubServices, startWifi")
