@@ -21,6 +21,8 @@ class MainApplication : Application() {
     var permissionAudio = false
     var serviceStarted = false
 
+    var htmlString = ""
+
     private var _dbShift: Float = 0f
     var dbShift: Float
         get() = _dbShift
@@ -76,6 +78,8 @@ class MainApplication : Application() {
         instance = this
         initSharedPrefs()  // init shared prefs
         ValueDatabase.loadDatabase(this)  // init database
+        htmlString =
+            loadHtmlResourceToString(context = this, R.raw.index).trimIndent()
 
         // create notification channel
         val channel = NotificationChannel(
@@ -97,7 +101,6 @@ class MainApplication : Application() {
             IntentFilter("toggleWifi"),
         )
 
-        initService()
     }
 
     private fun initSharedPrefs() {
@@ -113,26 +116,15 @@ class MainApplication : Application() {
     }
 
     fun toggleWifi() {
-        wifiOn != wifiOn
+        wifiOn = !wifiOn
         updateUiBroadcast()
         updateService()
-    }
-
-    // service stuff------------------------------------------------------------------
-    private fun initService() {
-        Log.d("MainApplication", "initService()")
-        val intent = Intent(applicationContext, ServerService::class.java)
-        val htmlString =
-            loadHtmlResourceToString(context = this, R.raw.index).trimIndent()
-        intent.putExtra("html", htmlString)
-        intent.action = "start"
-        startService(intent)
     }
 
     private fun updateService() {
         if (wifiOn or recordingOn) {
             val intent = Intent(applicationContext, ServerService::class.java)
-            intent.action = "start"
+            intent.action = "refresh"
             startService(intent)
         }
 
@@ -142,7 +134,7 @@ class MainApplication : Application() {
     }
 
     private fun stopService() {
-        Log.d("MainActivity", "stopping service")
+        Log.d("MainActivity", "stopService()")
         val intent = Intent(applicationContext, ServerService::class.java)
         intent.action = "stop"
         startService(intent)

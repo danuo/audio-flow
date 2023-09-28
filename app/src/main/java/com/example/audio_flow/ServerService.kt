@@ -25,24 +25,18 @@ class ServerService : Service() {
     override fun onCreate() {
         super.onCreate()
         audioRecorder = AudioRecorder(this)
-        Log.d("ServerService", "inside onCreate()")
+        Log.d("ServerService", "onCreate()")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d("ServerService", "onStartCommand()")
-        intent?.let {
-            if (intent.hasExtra("html")) {
-                htmlString = intent.getStringExtra("html")!!
-            }
-        }
+
         when (intent?.action) {
-            "start" -> {  // refresh both
+            "refresh" -> {
                 refreshNotification()
                 refreshSubServices()
             }
 
-            "refreshNotification" -> refreshNotification()
-            "refreshServices" -> refreshSubServices()
             "stop" -> {
                 Log.d("ServerService", "stopSelf()")
                 stopSelf()
@@ -95,10 +89,20 @@ class ServerService : Service() {
         } else {
             "Record stopped"
         }
+        val recorderActionString = if (application.recordingOn) {
+            "stop record"
+        } else {
+            "start record"
+        }
         val serverString = if (application.wifiOn) {
             "Server running"
         } else {
             "Server stopped"
+        }
+        val serverActionString = if (application.wifiOn) {
+            "stop server"
+        } else {
+            "start server"
         }
         val combinedString = recorderString + "\n" + serverString
         return NotificationCompat.Builder(this, "server_channel")
@@ -108,12 +112,12 @@ class ServerService : Service() {
             .setOngoing(true)
             .addAction(
                 androidx.appcompat.R.drawable.abc_btn_radio_material,
-                "stop record",
+                recorderActionString,
                 recordTogglePendingIntent
             )
             .addAction(
                 androidx.appcompat.R.drawable.abc_text_select_handle_middle_mtrl,
-                "stop wifi",
+                serverActionString,
                 wifiTogglePendingIntent
             )
             .build()
@@ -135,7 +139,7 @@ class ServerService : Service() {
 
     private fun startWifiServer() {
         if (serverThread == null) {
-            serverRunnable = ServerRunner(htmlString)
+            serverRunnable = ServerRunner(application.htmlString)
             serverThread = Thread(serverRunnable)
             serverThread?.start()
         }

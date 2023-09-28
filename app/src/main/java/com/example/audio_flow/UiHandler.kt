@@ -13,6 +13,7 @@ import java.util.Random
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.util.Log
 import android.view.Gravity
 import android.widget.EditText
 import kotlin.math.roundToInt
@@ -182,6 +183,7 @@ class UiHandler(
     }
 
     fun updateButtons() {
+        Log.d("UiHandler", "updateButtons() ${application.wifiOn}")
         context.handler.post {
             if (application.recordingOn) {
                 startRecordButton.text = "Stop Recording"
@@ -200,7 +202,7 @@ class UiHandler(
     private fun updateText() {
         context.handler.post {
             val outText =
-                "max: $maxAmpDbu, rms: $rmsAmpDbu, nSamples: $nSamples, ${application.showMilliseconds}"
+                "max: $maxAmpDbu, rms: $rmsAmpDbu, nSamples: $nSamples, ${application.wifiOn}"
             amplitudeTextView.text = outText
             dbShiftNum.setText(application.dbShift.round(1).toString())
             dbTargetNum.setText(application.dbTarget.round(1).toString())
