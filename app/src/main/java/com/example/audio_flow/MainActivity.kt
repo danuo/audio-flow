@@ -27,15 +27,13 @@ class MainActivity : ComponentActivity() {
     lateinit var databaseHandler: DataHandler
     lateinit var uiHandler: UiHandler
     val handler = Handler(Looper.getMainLooper())
-    var counter = 0
 
     private val ledDataReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.d("MainActivity", "ledDataReceiver, ${intent?.action}")
             val maxAmplitudeDbu = intent?.getDoubleExtra("maxAmplitudeDbu", 20.0)?.toInt()
             val rmsAmplitudeDbu = intent?.getDoubleExtra("rmsAmplitudeDbu", 20.0)?.toInt()
+            Log.d("MainActivity", "ledDataReceiver, ${intent?.action} $maxAmplitudeDbu")
             if ((maxAmplitudeDbu is Int) and (rmsAmplitudeDbu is Int)) {
-                counter += 1
                 uiHandler.updateUI(
                     mapOf(
                         "maxAmplitudeDbu" to maxAmplitudeDbu!!,

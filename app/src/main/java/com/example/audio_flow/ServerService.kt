@@ -15,7 +15,6 @@ class ServerService : Service() {
     private val application: MainApplication = MainApplication.getInstance()
     private var serverRunnable: ServerRunner? = null
     private var serverThread: Thread? = null
-    private var htmlString: String = ""
 
     override fun onBind(intent: Intent?): IBinder? {
         Log.d("ServerService", "onBind()")
