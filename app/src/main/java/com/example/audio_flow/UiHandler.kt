@@ -136,6 +136,7 @@ class UiHandler(
                 button.setOnClickListener {
                     application.dbTarget += valuesDbButtons[i]
                     updateText()
+                    uiChart.updateLimit(application.dbTarget, invalidate = true)
                 }
                 binding.dbTargetSelectorLayout.addView(button)
             }

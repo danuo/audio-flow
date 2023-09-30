@@ -1,8 +1,10 @@
 package com.example.audio_flow
 
+import android.R
 import android.annotation.SuppressLint
 import android.graphics.Color
 import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.LimitLine
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
@@ -10,8 +12,8 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import java.text.SimpleDateFormat
 import java.util.Date
 
-class UiChart(private val chart: LineChart, dbThresholds: List<Float>) {
 
+class UiChart(private val chart: LineChart, dbThresholds: List<Float>) {
     private val application: MainApplication = MainApplication.getInstance()
 
     init {
@@ -49,7 +51,28 @@ class UiChart(private val chart: LineChart, dbThresholds: List<Float>) {
         chart.setBackgroundColor(Color.BLACK)
     }
 
+    fun updateLimit(limit: Float, invalidate: Boolean) {
+        chart.axisLeft.removeAllLimitLines()
+
+        // add a LimitLine
+        var limitLine = LimitLine(limit, "dB target")
+        limitLine.lineColor = 0xFF0000FF.toInt()
+        limitLine.lineWidth = 2f
+        chart.axisLeft.addLimitLine(limitLine)
+
+        if (invalidate) {
+            chart.invalidate()
+        }
+    }
+
     fun updateChart(data: List<Value>) {
+        if (data.isEmpty()) {
+            chart.data = null
+            chart.axisLeft.removeAllLimitLines()
+            chart.invalidate()
+            return
+        }
+
         if (chart.data != null &&
             chart.data.dataSetCount > 0
         ) { // update
@@ -94,6 +117,9 @@ class UiChart(private val chart: LineChart, dbThresholds: List<Float>) {
             val lineData = LineData(maxDataSet, rmsDataSet)
 
             chart.data = lineData
+
+            updateLimit(application.dbTarget, invalidate = false)
+
             chart.invalidate()
         }
     }

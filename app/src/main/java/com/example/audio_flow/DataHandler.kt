@@ -1,5 +1,6 @@
 package com.example.audio_flow
 
+import android.util.Log
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
@@ -31,9 +32,8 @@ class DataHandler(
         job?.cancel()
         job = context.lifecycleScope.launch {
             viewModel.getValuesNewerThan(timeStamp).collect() { data ->
-                if (data.isNotEmpty()) {
-                    uiHandler.uiChart.updateChart(data)
-                }
+                Log.d("DataHandler", "count of data is ${data.size}")
+                uiHandler.uiChart.updateChart(data)
                 if (System.currentTimeMillis() - initTime > 1000 * 10) {
                     renewDataQuery()
                 }
