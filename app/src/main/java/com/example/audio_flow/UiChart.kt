@@ -101,46 +101,47 @@ class UiChart(private val chart: LineChart, dbThresholds: List<Float>) {
             return
         }
 
-        if (chart.data != null &&
-            chart.data.dataSetCount > 0
-        ) { // update
-            val setMaxAmplitude = chart.data.getDataSetByIndex(0) as LineDataSet
-            setMaxAmplitude.values =
-                createEntryList(getTimeList(data), getMaxAmpDbu(data))
-            val setRmsAmplitude = chart.data.getDataSetByIndex(1) as LineDataSet
-            setRmsAmplitude.values =
-                createEntryList(getTimeList(data), getRmsAmpDbu(data))
-            chart.data.notifyDataChanged()
-            chart.notifyDataSetChanged()
-            chart.invalidate()
+        if (chart.data == null) {
+            initChartData(data)
         } else {
-            // create datasets
-            val maxDataSet =
-                LineDataSet(
-                    createEntryList(
-                        getTimeList(data),
-                        getMaxAmpDbu(data)
-                    ), "max amplitude"
-                )
-            maxDataSet.setDrawCircles(false)
-            maxDataSet.setDrawValues(false)
-            maxDataSet.color = 0xFFFF0000.toInt()
-            val rmsDataSet =
-                LineDataSet(
-                    createEntryList(getTimeList(data), getRmsAmpDbu(data)),
-                    "rms amplitude"
-                )
-            rmsDataSet.setDrawCircles(false)
-            rmsDataSet.setDrawValues(false)
-            rmsDataSet.color = 0xFF00FF00.toInt()
-            val lineData = LineData(maxDataSet, rmsDataSet)
-
-            chart.data = lineData
-
-            updateLimit(application.dbTarget, invalidate = false)
-
-            chart.invalidate()
+            updateChartData(data)
         }
+    }
+
+    private fun updateChartData(data: List<Value>) {
+        val setMaxAmplitude = chart.data.getDataSetByIndex(0) as LineDataSet
+        setMaxAmplitude.values = createEntryList(getTimeList(data), getMaxAmpDbu(data))
+        val setRmsAmplitude = chart.data.getDataSetByIndex(1) as LineDataSet
+        setRmsAmplitude.values = createEntryList(getTimeList(data), getRmsAmpDbu(data))
+        chart.data.notifyDataChanged()
+        chart.notifyDataSetChanged()
+        chart.invalidate()
+    }
+
+    private fun initChartData(data: List<Value>) {
+        val maxDataSet =
+            LineDataSet(
+                createEntryList(
+                    getTimeList(data),
+                    getMaxAmpDbu(data)
+                ), "max amplitude"
+            )
+        maxDataSet.setDrawCircles(false)
+        maxDataSet.setDrawValues(false)
+        maxDataSet.color = 0xFFFF0000.toInt()
+        val rmsDataSet =
+            LineDataSet(
+                createEntryList(getTimeList(data), getRmsAmpDbu(data)),
+                "rms amplitude"
+            )
+        rmsDataSet.setDrawCircles(false)
+        rmsDataSet.setDrawValues(false)
+        rmsDataSet.color = 0xFF00FF00.toInt()
+        val lineData = LineData(maxDataSet, rmsDataSet)
+
+        chart.data = lineData
+        updateLimit(application.dbTarget, invalidate = false)
+        chart.invalidate()
     }
 }
 
