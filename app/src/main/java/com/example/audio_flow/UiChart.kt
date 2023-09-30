@@ -1,6 +1,5 @@
 package com.example.audio_flow
 
-import android.R
 import android.annotation.SuppressLint
 import android.graphics.Color
 import com.github.mikephil.charting.charts.LineChart
@@ -65,11 +64,40 @@ class UiChart(private val chart: LineChart, dbThresholds: List<Float>) {
         }
     }
 
+    private fun clearChart() {
+        chart.data = null
+        chart.axisLeft.removeAllLimitLines()
+        chart.invalidate()
+    }
+
+    private fun createEntryList(xData: List<Float>, yData: List<Float>): List<Entry> {
+        assert(xData.size == yData.size)
+        return xData.zip(yData).map {
+            Entry(it.first, it.second)
+        }
+    }
+
+    private fun getTimeList(data: List<Value>): List<Float> {
+        return data.map {
+            (it.time - TIME_SHIFT).toFloat()
+        }
+    }
+
+    private fun getMaxAmpDbu(data: List<Value>): List<Float> {
+        return data.map {
+            it.maxAmpDbu + application.dbShift
+        }
+    }
+
+    private fun getRmsAmpDbu(data: List<Value>): List<Float> {
+        return data.map {
+            it.rmsAmpDbu + application.dbShift
+        }
+    }
+
     fun updateChart(data: List<Value>) {
         if (data.isEmpty()) {
-            chart.data = null
-            chart.axisLeft.removeAllLimitLines()
-            chart.invalidate()
+            clearChart()
             return
         }
 
@@ -77,40 +105,31 @@ class UiChart(private val chart: LineChart, dbThresholds: List<Float>) {
             chart.data.dataSetCount > 0
         ) { // update
             val setMaxAmplitude = chart.data.getDataSetByIndex(0) as LineDataSet
-            setMaxAmplitude.values = data.map {
-                Entry(
-                    (it.time - TIME_SHIFT).toFloat(),
-                    it.maxAmpDbu + application.dbShift
-                )
-            }
+            setMaxAmplitude.values =
+                createEntryList(getTimeList(data), getMaxAmpDbu(data))
             val setRmsAmplitude = chart.data.getDataSetByIndex(1) as LineDataSet
-            setRmsAmplitude.values = data.map {
-                Entry(
-                    (it.time - TIME_SHIFT).toFloat(),
-                    it.rmsAmpDbu + application.dbShift
-                )
-            }
+            setRmsAmplitude.values =
+                createEntryList(getTimeList(data), getRmsAmpDbu(data))
             chart.data.notifyDataChanged()
             chart.notifyDataSetChanged()
             chart.invalidate()
         } else {
             // create datasets
             val maxDataSet =
-                LineDataSet(data.map {
-                    Entry(
-                        (it.time - TIME_SHIFT).toFloat(),
-                        it.maxAmpDbu + application.dbShift
-                    )
-                }, "max amplitude")
+                LineDataSet(
+                    createEntryList(
+                        getTimeList(data),
+                        getMaxAmpDbu(data)
+                    ), "max amplitude"
+                )
             maxDataSet.setDrawCircles(false)
             maxDataSet.setDrawValues(false)
             maxDataSet.color = 0xFFFF0000.toInt()
-            val rmsDataSet = LineDataSet(data.map {
-                Entry(
-                    (it.time - TIME_SHIFT).toFloat(),
-                    it.rmsAmpDbu + application.dbShift
+            val rmsDataSet =
+                LineDataSet(
+                    createEntryList(getTimeList(data), getRmsAmpDbu(data)),
+                    "rms amplitude"
                 )
-            }, "rms amplitude")
             rmsDataSet.setDrawCircles(false)
             rmsDataSet.setDrawValues(false)
             rmsDataSet.color = 0xFF00FF00.toInt()
