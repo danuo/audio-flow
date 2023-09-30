@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlin.math.abs
@@ -22,18 +21,22 @@ class AudioRecorder(
     private val application: MainApplication = MainApplication.getInstance()
     private var audioRecord: AudioRecord? = null
 
-    private val nGroup: Int = 30  // every 3 seconds
-    private var counter: Int = 0
+    private var poolingCounter: Int = 0
     private var maxAmpList: List<Double> = listOf()
     private var rmsAmpSquareSum: Double = 0.0
-    private val databaseAudio: AudioDatabaseThing = AudioDatabaseThing()
+    private val databaseAudio: AudioDatahandler = AudioDatahandler()
     private var recordingThread: Thread? = null
-    var sendTime = System.currentTimeMillis()
+    private var sendTime = System.currentTimeMillis()
+
+    companion object {
+        const val N_SAMPLE_POOLING: Int = 30
+        const val SAMPLE_RATE = 44100
+        const val BUFFER_SIZE = (SAMPLE_RATE / MainApplication.REFRESH_RATE)  // before: 1024
+    }
 
     init {
         initAudio()
     }
-
 
     private fun initAudio() {
         val minBufferSize = AudioRecord.getMinBufferSize(
@@ -55,12 +58,6 @@ class AudioRecorder(
             )
         }
     }
-
-    companion object {
-        const val SAMPLE_RATE = 44100
-        const val BUFFER_SIZE = (SAMPLE_RATE / MainActivity.REFRESH_RATE)  // before: 1024
-    }
-
 
     fun startRecordingThread() {
         if (application.recordingOn) {
@@ -122,11 +119,11 @@ class AudioRecorder(
     private fun poolData(maxAmplitude: Double, rmsAmplitude: Double) {
         maxAmpList += maxAmplitude
         rmsAmpSquareSum += rmsAmplitude.pow(2)
-        counter += 1
-        if (counter == nGroup) {
+        poolingCounter += 1
+        if (poolingCounter == N_SAMPLE_POOLING) {
             val maxAmp = maxAmpList.max()
             val maxAmpDbu = valToDbu(maxAmp)
-            val rmsAmpSquareAvg = rmsAmpSquareSum / nGroup
+            val rmsAmpSquareAvg = rmsAmpSquareSum / N_SAMPLE_POOLING
             val rmsAmp = sqrt(rmsAmpSquareAvg)
             val rmsAmpDbu = valToDbu(rmsAmp)
             val time: Long = System.currentTimeMillis()
@@ -137,13 +134,13 @@ class AudioRecorder(
             )
             maxAmpList = listOf()
             rmsAmpSquareSum = 0.0
-            counter = 0
+            poolingCounter = 0
         }
     }
 
 }
 
-class AudioDatabaseThing {
+class AudioDatahandler {
     private val viewModel = ValueViewModel()
 
     fun insertData(time: Long, maxAmpDbu: Float, rmsAmpDbu: Float) {

@@ -61,6 +61,7 @@ class MainApplication : Application() {
     }
 
     companion object {
+        const val REFRESH_RATE = 10
         private lateinit var instance: MainApplication
         fun getInstance(): MainApplication {
             return instance

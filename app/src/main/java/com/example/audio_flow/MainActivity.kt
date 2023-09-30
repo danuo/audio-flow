@@ -22,7 +22,6 @@ import com.example.audio_flow.databinding.ActivityMainBinding
 
 //bugs:
 //will start without microphone permission -> causes plenty of bugs
-//notification will not respawn
 
 
 class MainActivity : ComponentActivity() {
@@ -57,16 +56,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    companion object {
-        const val REFRESH_RATE = 10
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d("MainActivity", "now")
-
+        Log.d("MainActivity", "onCreate")
         _binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-
         uiHandler = UiHandler(this, binding)
         databaseHandler = DataHandler(context = this, uiHandler = uiHandler)
         getPermissionsNotification()
