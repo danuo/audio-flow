@@ -1,172 +1,179 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:ignore="VisualLintButtonSize">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
 
     <LinearLayout
-        android:id="@+id/buttons"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/toggleOptionsButton"
-            android:layout_width="0dp"
-            android:layout_height="55dp"
-            android:layout_weight="0.5"
-            android:text="Options" />
-
-        <Button
-            android:id="@+id/toggleDebugButton"
-            android:layout_width="0dp"
-            android:layout_height="55dp"
-            android:layout_weight="0.5"
-            android:text="Debug" />
-
-        <Button
-            android:id="@+id/startButton"
-            android:layout_width="0dp"
-            android:layout_height="55dp"
-            android:layout_weight="1"
-            android:text="Start Recording"
-            tools:ignore="ButtonStyle" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/optionsLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="select time frame"
-            android:textSize="11sp"
-            android:paddingLeft="10dp"></TextView>
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:ignore="VisualLintButtonSize">
 
         <LinearLayout
-            android:id="@+id/timeSelector"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"></LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="adjust dB shift"
-            android:textSize="11sp"
-            android:paddingLeft="10dp"></TextView>
-
-        <LinearLayout
-            android:id="@+id/dbShiftSelector"
+            android:id="@+id/buttons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <EditText
-                android:id="@+id/dbShiftNum"
+            <Button
+                android:id="@+id/toggleOptionsButton"
                 android:layout_width="0dp"
                 android:layout_height="55dp"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:enabled="true"
-                android:gravity="center_vertical|center_horizontal"
-                android:text="test"
-                android:layout_weight="1"></EditText>
+                android:layout_weight="0.5"
+                android:text="Options" />
 
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/dbTargetSelector"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <EditText
-                android:id="@+id/dbTargetNum"
+            <Button
+                android:id="@+id/toggleDebugButton"
                 android:layout_width="0dp"
                 android:layout_height="55dp"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:enabled="true"
-                android:gravity="center_vertical|center_horizontal"
-                android:text="target"
-                android:layout_weight="1"></EditText>
+                android:layout_weight="0.5"
+                android:text="Debug" />
+
+            <Button
+                android:id="@+id/startRecordButton"
+                android:layout_width="0dp"
+                android:layout_height="55dp"
+                android:layout_weight="1"
+                android:text="Start Recording"
+                tools:ignore="ButtonStyle" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/optionsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="select time frame"
+                android:textSize="11sp"
+                android:paddingLeft="10dp"></TextView>
+
+            <LinearLayout
+                android:id="@+id/timeSelector"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"></LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="adjust dB shift"
+                android:textSize="11sp"
+                android:paddingLeft="10dp"></TextView>
+
+            <LinearLayout
+                android:id="@+id/dbShiftSelectorLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/dbShiftNum"
+                    android:layout_width="0dp"
+                    android:layout_height="55dp"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:enabled="true"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:text="test"
+                    android:layout_weight="1"></EditText>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/dbTargetSelectorLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/dbTargetNum"
+                    android:layout_width="0dp"
+                    android:layout_height="55dp"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:enabled="true"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:text="target"
+                    android:layout_weight="1"></EditText>
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/debugLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/deleteDataButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Delete Data" />
+
+                <Button
+                    android:id="@+id/generateDataButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Gen. Data" />
+
+                <Button
+                    android:id="@+id/startWifiButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Start Wifi" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/amplitudeText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Amplitude: 0"
+                android:textSize="11sp"
+                android:gravity="center"
+                android:padding="5dp"
+                tools:ignore="HardcodedText" />
 
         </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/debugLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
             android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/deleteDataButton"
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/lineChart"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Delete Data" />
+                android:layout_height="match_parent" />
 
-            <Button
-                android:id="@+id/generateDataButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Gen. Data" />
+            <LinearLayout
+                android:id="@+id/audioFlowLayoutText"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical"></LinearLayout>
 
-            <Button
-                android:id="@+id/startWifi"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Start Wifi" />
+            <LinearLayout
+                android:id="@+id/audioFlowLayout"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical"></LinearLayout>
 
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/amplitudeText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Amplitude: 0"
-            android:textSize="11sp"
-            android:gravity="center"
-            android:padding="5dp"
-            tools:ignore="HardcodedText" />
-
     </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="fill_parent"
-        android:orientation="horizontal">
-
-        <com.github.mikephil.charting.charts.LineChart
-            android:id="@+id/lineChart"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent" />
-
-        <LinearLayout
-            android:id="@+id/audioFlowLayoutText"
-            android:layout_width="40dp"
-            android:layout_height="match_parent"
-            android:orientation="vertical"></LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/audioFlowLayout"
-            android:layout_width="40dp"
-            android:layout_height="match_parent"
-            android:orientation="vertical"></LinearLayout>
-
-    </LinearLayout>
-</LinearLayout>
+</layout>

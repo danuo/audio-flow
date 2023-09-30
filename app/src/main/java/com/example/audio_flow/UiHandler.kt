@@ -15,6 +15,7 @@ import android.graphics.drawable.GradientDrawable
 import android.util.Log
 import android.view.Gravity
 import android.widget.EditText
+import com.example.audio_flow.databinding.ActivityMainBinding
 import kotlin.math.roundToInt
 
 
@@ -26,6 +27,7 @@ const val DB_STEP = -1
 @SuppressLint("SetTextI18n")
 class UiHandler(
     private val context: MainActivity,
+    private val binding: ActivityMainBinding
 ) {
     private val application: MainApplication = MainApplication.getInstance()
     private val amplitudeTextView: TextView = context.findViewById(R.id.amplitudeText)
@@ -38,70 +40,61 @@ class UiHandler(
 
     private val drawables: Map<String, List<Drawable>>
     private val dbThresholds: List<Float>
-    private val optionsLayout: LinearLayout
-    private val debugLayout: LinearLayout
+
+    //    private val optionsLayout: LinearLayout
+//    private val debugLayout: LinearLayout
     private var optionsLayoutVisible = false
     private var debugLayoutVisible = false
     var uiChart: UiChart
-
-    private val buttonHeight: Int
-
-    private val startWifiButton = context.findViewById<Button>(R.id.startWifi)
-    private val toggleOptionsButton: Button = context.findViewById(R.id.toggleOptionsButton)
-    private val toggleDebugButton: Button = context.findViewById(R.id.toggleDebugButton)
-    private val deleteDataButton = context.findViewById<Button>(R.id.deleteDataButton)
-    private val generateDataButton = context.findViewById<Button>(R.id.generateDataButton)
-    private val startRecordButton = context.findViewById<Button>(R.id.startButton)
-
 
     init {
         dbThresholds = getDbThresholds()
         drawables = generateDrawables()
         initLeds()
-        uiChart = UiChart(context.findViewById(R.id.lineChart), dbThresholds)
-        debugLayout = context.findViewById(R.id.debugLayout)
-        optionsLayout = context.findViewById(R.id.optionsLayout)
+        uiChart = UiChart(binding.lineChart, dbThresholds)
+//        debugLayout = context.findViewById(R.id.debugLayout)
+//        optionsLayout = context.findViewById(R.id.optionsLayout)
         applyVisibility()
         initOptionButtons()
-        toggleOptionsButton.setOnClickListener {
+
+        binding.toggleOptionsButton.setOnClickListener {
             optionsLayoutVisible = !optionsLayoutVisible
             applyVisibility()
         }
-        buttonHeight = toggleOptionsButton.height
-        toggleDebugButton.setOnClickListener {
+        binding.toggleDebugButton.setOnClickListener {
             debugLayoutVisible = !debugLayoutVisible
             applyVisibility()
         }
-        deleteDataButton.setOnClickListener {
+        binding.deleteDataButton.setOnClickListener {
             showDeleteConfirmationDialog()
         }
-        generateDataButton.setOnClickListener {
+        binding.generateDataButton.setOnClickListener {
             generateData()
         }
 
-        startRecordButton.setOnClickListener {
+        binding.startRecordButton.setOnClickListener {
             application.toggleRecording()
         }
 
-        startWifiButton.setOnClickListener {
+        binding.startWifiButton.setOnClickListener {
             application.toggleWifi()
         }
     }
 
 
     private fun initOptionButtons() {
-        val timeSelector = context.findViewById<LinearLayout>(R.id.timeSelector)
-        val dbShiftSelectorLayout = context.findViewById<LinearLayout>(R.id.dbShiftSelector)
-        val dbTargetSelectorLayout = context.findViewById<LinearLayout>(R.id.dbTargetSelector)
-        val editTextDbShift = dbShiftSelectorLayout.getChildAt(0)
-        val editTextDbTarget = dbTargetSelectorLayout.getChildAt(0)
+//        val timeSelector = context.findViewById<LinearLayout>(R.id.timeSelector)
+//        val dbShiftSelectorLayout = context.findViewById<LinearLayout>(R.id.dbShiftSelector)
+//        val dbTargetSelectorLayout = context.findViewById<LinearLayout>(R.id.dbTargetSelector)
+        val editTextDbShift = binding.dbShiftSelectorLayout.getChildAt(0)
+        val editTextDbTarget = binding.dbTargetSelectorLayout.getChildAt(0)
         val valuesTimeButtons =
             listOf<Long>(6 * 3600 * 1000, 3 * 3600 * 1000, 3600 * 1000, 1800 * 1000, 600 * 1000)
-        val textTimeButtons = listOf<String>("6h", "3h", "1h", "30m", "10m")
-        val valuesDbButtons = listOf<Float>(-1f, -0.1f, 0f, 0.1f, 1f)
-        val textsDbButtons = listOf<String>("-1", "-0.1", "", "+0.1", "+1")
-        dbShiftSelectorLayout.removeAllViews()
-        dbTargetSelectorLayout.removeAllViews()
+        val textTimeButtons = listOf("6h", "3h", "1h", "30m", "10m")
+        val valuesDbButtons = listOf(-1f, -0.1f, 0f, 0.1f, 1f)
+        val textsDbButtons = listOf("-1", "-0.1", "", "+0.1", "+1")
+        binding.dbShiftSelectorLayout.removeAllViews()
+        binding.dbTargetSelectorLayout.removeAllViews()
 
         // button layout
         val height = (Resources.getSystem().displayMetrics.density * 55).toInt()
@@ -119,12 +112,12 @@ class UiHandler(
                 context.databaseHandler.renewDataQuery()
                 updateText()
             }
-            timeSelector.addView(button)
+            binding.timeSelector.addView(button)
 
             // dbShift and dbTarget
             if (i == 2) {
-                dbShiftSelectorLayout.addView(editTextDbShift)
-                dbTargetSelectorLayout.addView((editTextDbTarget))
+                binding.dbShiftSelectorLayout.addView(editTextDbShift)
+                binding.dbTargetSelectorLayout.addView((editTextDbTarget))
             } else {
                 // shift selector
                 button = Button(context)
@@ -134,7 +127,7 @@ class UiHandler(
                     application.dbShift += valuesDbButtons[i]
                     updateText()
                 }
-                dbShiftSelectorLayout.addView(button)
+                binding.dbShiftSelectorLayout.addView(button)
 
                 // target selector
                 button = Button(context)
@@ -144,7 +137,7 @@ class UiHandler(
                     application.dbTarget += valuesDbButtons[i]
                     updateText()
                 }
-                dbTargetSelectorLayout.addView(button)
+                binding.dbTargetSelectorLayout.addView(button)
             }
         }
         updateText()
@@ -153,14 +146,14 @@ class UiHandler(
 
     private fun applyVisibility() {
         if (debugLayoutVisible) {
-            debugLayout.visibility = View.VISIBLE
+            binding.debugLayout.visibility = View.VISIBLE
         } else {
-            debugLayout.visibility = View.GONE
+            binding.debugLayout.visibility = View.GONE
         }
         if (optionsLayoutVisible) {
-            optionsLayout.visibility = View.VISIBLE
+            binding.optionsLayout.visibility = View.VISIBLE
         } else {
-            optionsLayout.visibility = View.GONE
+            binding.optionsLayout.visibility = View.GONE
         }
     }
 
@@ -185,15 +178,15 @@ class UiHandler(
         Log.d("UiHandler", "updateButtons() ${application.wifiOn}")
         context.handler.post {
             if (application.recordingOn) {
-                startRecordButton.text = "Stop Recording"
+                binding.startRecordButton.text = "Stop Recording"
             } else {
-                startRecordButton.text = "Start Recording"
+                binding.startRecordButton.text = "Start Recording"
             }
 
             if (application.wifiOn) {
-                startWifiButton.text = "Stop Wifi"
+                binding.startWifiButton.text = "Stop Wifi"
             } else {
-                startWifiButton.text = "Start Wifi"
+                binding.startWifiButton.text = "Start Wifi"
             }
         }
     }

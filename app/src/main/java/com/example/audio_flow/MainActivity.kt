@@ -1,20 +1,23 @@
 package com.example.audio_flow
 
-import android.content.Context
 import android.Manifest
 import android.content.BroadcastReceiver
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import androidx.activity.ComponentActivity
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.view.View
+import androidx.activity.ComponentActivity
+import androidx.databinding.DataBindingUtil
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.example.audio_flow.databinding.ActivityMainBinding
 
 
 //bugs:
@@ -27,6 +30,9 @@ class MainActivity : ComponentActivity() {
     lateinit var databaseHandler: DataHandler
     lateinit var uiHandler: UiHandler
     val handler = Handler(Looper.getMainLooper())
+
+    private var _binding: ActivityMainBinding? = null
+    private val binding get() = _binding!!
 
     private val ledDataReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -58,9 +64,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("MainActivity", "now")
-        setContentView(R.layout.activity_main)
 
-        uiHandler = UiHandler(this)
+        _binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+
+        uiHandler = UiHandler(this, binding)
         databaseHandler = DataHandler(context = this, uiHandler = uiHandler)
         getPermissionsNotification()
     }
