@@ -14,14 +14,11 @@ class DataHandler(
         ViewModelProvider(context).get(modelClass = ValueViewModel::class.java)
 
     private var job: Job? = null
-    var dataCount: Int = 10
-    var newestData = listOf<Value>()
 
     init {
         cleanupDatabase()
         context.lifecycleScope.launch {
-            viewModel.getDataCount().collect() { data ->
-                dataCount = data
+            viewModel.getDataCount().collect() { dataCount ->
                 uiHandler.updateUI(mapOf("nSamples" to dataCount))
             }
         }
@@ -34,7 +31,6 @@ class DataHandler(
         job?.cancel()
         job = context.lifecycleScope.launch {
             viewModel.getValuesNewerThan(timeStamp).collect() { data ->
-                newestData = data
                 if (data.isNotEmpty()) {
                     uiHandler.uiChart.updateChart(data)
                 }
@@ -50,7 +46,6 @@ class DataHandler(
     }
 
     fun deleteAll() {
-        newestData = listOf()
         viewModel.deleteAll()
     }
 
