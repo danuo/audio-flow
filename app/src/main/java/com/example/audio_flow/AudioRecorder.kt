@@ -24,7 +24,7 @@ class AudioRecorder(
     private var poolingCounter: Int = 0
     private var maxAmpList: List<Double> = listOf()
     private var rmsAmpSquareSum: Double = 0.0
-    private val databaseAudio: AudioDatahandler = AudioDatahandler()
+    private val databaseAudio: AudioDataHandler = AudioDataHandler()
     private var recordingThread: Thread? = null
     private var sendTime = System.currentTimeMillis()
 
@@ -140,7 +140,7 @@ class AudioRecorder(
 
 }
 
-class AudioDatahandler {
+class AudioDataHandler {
     private val viewModel = ValueViewModel()
 
     fun insertData(time: Long, maxAmpDbu: Float, rmsAmpDbu: Float) {
